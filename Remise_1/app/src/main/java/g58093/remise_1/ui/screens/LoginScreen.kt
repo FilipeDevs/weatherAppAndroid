@@ -30,7 +30,7 @@ fun LoginScreen(
         horizontalArrangement = Arrangement.Center
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(8.dp)
         ) {
             TextField(
                 value = loginViewModel.userEmail,
@@ -60,7 +60,10 @@ fun LoginScreen(
             onClick = { loginViewModel.isEmailValid() },
             modifier = Modifier.padding(3.dp)
         ) {
-            Text(text = "OK")
+            Text(
+                text = "OK",
+                color = Color.White
+            )
         }
     }
 }
