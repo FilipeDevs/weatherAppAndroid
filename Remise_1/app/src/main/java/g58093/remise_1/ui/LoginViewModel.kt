@@ -22,17 +22,9 @@ class LoginViewModel : ViewModel() {
     }
 
     fun isEmailValid() {
-        val emailRegex = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
-        val isEmailCorrect = userEmail.matches(emailRegex.toRegex())
+        val isEmailCorrect = android.util.Patterns.EMAIL_ADDRESS.matcher(userEmail).matches()
 
-        // Email format is wrong
-        if (!isEmailCorrect) {
-            _uiState.update { currentState -> currentState.copy(isEmailWrong = true) }
-        } else {
-            // Email format is OK
-            _uiState.update { currentState -> currentState.copy(isEmailWrong = false) }
-        }
+        _uiState.update { currentState -> currentState.copy(isEmailWrong = !isEmailCorrect) }
 
-        _uiState.update { currentState -> currentState.copy(canNavigate = true) }
     }
 }

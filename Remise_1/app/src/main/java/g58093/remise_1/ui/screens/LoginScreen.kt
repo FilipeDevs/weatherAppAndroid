@@ -7,14 +7,17 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import g58093.remise_1.ui.LoginViewModel
+import g58093.remise_1.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,6 +27,12 @@ fun LoginScreen(
 ) {
 
     val loginState by loginViewModel.uiState.collectAsState()
+
+    LaunchedEffect(loginState.isEmailWrong) {
+        if (loginState.isEmailWrong == false) {
+            navigateToHome()
+        }
+    }
 
     Row(
         modifier = Modifier.fillMaxSize(),
@@ -36,33 +45,29 @@ fun LoginScreen(
             TextField(
                 value = loginViewModel.userEmail,
                 onValueChange = { loginViewModel.updateUserEmail(it) },
-                keyboardActions = KeyboardActions( // Enter
+                keyboardActions = KeyboardActions( // Enter ?
                     onDone = { loginViewModel.isEmailValid() }
                 ),
                 singleLine = true,
-                isError = loginState.isEmailWrong
             )
 
-            if (loginState.isEmailWrong) {
-                Spacer(modifier = Modifier.height(4.dp)) // Add spacing
+            if (loginState.isEmailWrong == true) {
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Error, the email is not valid",
+                    text = stringResource(R.string.error),
                     color = Color.Red
                 )
-            }
-            // When loading the Screen for the 1st time the email is "valid" so it does not show
-            // the error message, but it still can't navigate to Home Screen
-            if(loginState.canNavigate) {
-                navigateToHome() // Email is valid go to Home Screen
             }
         }
 
         Button(
-            onClick = { loginViewModel.isEmailValid() },
+            onClick = {
+                loginViewModel.isEmailValid()
+            },
             modifier = Modifier.padding(3.dp)
         ) {
             Text(
-                text = "OK",
+                text = stringResource(R.string.ok),
                 color = Color.White
             )
         }
