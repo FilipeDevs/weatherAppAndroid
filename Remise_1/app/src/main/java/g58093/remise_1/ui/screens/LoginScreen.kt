@@ -13,12 +13,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import g58093.remise_1.ui.LoginViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    loginViewModel: LoginViewModel,
+    loginViewModel: LoginViewModel = viewModel(),
     navigateToHome: () -> Unit,
 ) {
 
@@ -51,7 +52,7 @@ fun LoginScreen(
             }
             // When loading the Screen for the 1st time the email is "valid" so it does not show
             // the error message, but it still can't navigate to Home Screen
-            else if(loginState.canNavigate) {
+            if(loginState.canNavigate) {
                 navigateToHome() // Email is valid go to Home Screen
             }
         }

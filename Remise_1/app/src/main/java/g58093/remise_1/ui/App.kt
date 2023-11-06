@@ -20,12 +20,8 @@ enum class AppScreen(@StringRes val title: Int) {
 }
 
 @Composable
-fun App(
-    loginViewModel: LoginViewModel = viewModel(),
-    navController: NavHostController = rememberNavController()
-) {
-
-    val image = painterResource(R.drawable.logo)
+fun App() {
+    val navController = rememberNavController()
 
     // Navigation Controller
     NavHost(
@@ -33,12 +29,12 @@ fun App(
         startDestination = AppScreen.Login.name,
     ) {
         composable(route = AppScreen.Login.name) {// Login Screen
-            LoginScreen(loginViewModel = loginViewModel, navigateToHome = {
+            LoginScreen(navigateToHome = {
                 navController.navigate(AppScreen.Home.name)
             })
         }
         composable(route = AppScreen.Home.name) {
-            HomeScreen(image = image)
+            HomeScreen()
         }
     }
 }
