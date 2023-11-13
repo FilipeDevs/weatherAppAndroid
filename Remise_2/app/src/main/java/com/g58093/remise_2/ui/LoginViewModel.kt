@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.g58093.remise_2.network.AuthApi
 import com.g58093.remise_2.network.AuthRequest
-import com.g58093.remise_2.network.AuthResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -44,24 +43,34 @@ class LoginViewModel : ViewModel() {
 
     fun submitCredentials() {
         val authRequest = AuthRequest(this.userEmail, this.userPassword)
-        Log.e("Auth", authRequest.toString())
+        Log.d("Auth", authRequest.toString())
         viewModelScope.launch {
-            val call = AuthApi.authApiService.authenticate(authRequest)
+            try {
+                val call = AuthApi.authApiService.authenticate(authRequest)
 
-            call.enqueue(object : Callback<AuthResponse> {
-                override fun onResponse(call: Call<AuthResponse>, response: Response<AuthResponse>) {
-                    if (response.isSuccessful) {
-                        //val authResponse = response.body()
-                        _uiState.update { currentState -> currentState.copy(authenticated = true) }
-                    } else {
+                call.enqueue(object : Callback<Void> {
+                    override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                        if (response.isSuccessful) {
+                            val statusCode = response.code()
+                            _uiState.update { currentState -> currentState.copy(authenticated = true) }
+                        } else {
+
+                            val errorBody = response.errorBody()?.string()
+                            Log.e("Failed", "Error Body: $errorBody")
+                            _uiState.update { currentState -> currentState.copy(isCredentialsCorrect = false) }
+                        }
+                    }
+
+                    override fun onFailure(call: Call<Void>, t: Throwable) {
+                        Log.e("Failed", "Throwable: ${t.message}")
                         _uiState.update { currentState -> currentState.copy(isCredentialsCorrect = false) }
                     }
-                }
-
-                override fun onFailure(call: Call<AuthResponse>, t: Throwable) {
-                    _uiState.update { currentState -> currentState.copy(isCredentialsCorrect = false) }
-                }
-            })
+                })
+            } catch (t: Throwable) {
+                Log.e("Failed", "Throwable: ${t.message}")
+                _uiState.update { currentState -> currentState.copy(isCredentialsCorrect = false) }
+            }
         }
     }
+
 }

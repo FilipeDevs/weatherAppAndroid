@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.g58093.remise_2.R
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(modifier: Modifier) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
