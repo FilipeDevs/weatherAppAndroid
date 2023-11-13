@@ -1,7 +1,10 @@
 <resources>
     <string name="app_name">Remise_2</string>
     <string name="login">Login</string>
+    <string name="auth">Auth</string>
     <string name="home">Home</string>
+    <string name="about">About</string>
     <string name="ok">OK</string>
     <string name="error">Error, the email is not valid</string>
+    <string name="errorAuth">Error, wrong password or email</string>
 </resources>

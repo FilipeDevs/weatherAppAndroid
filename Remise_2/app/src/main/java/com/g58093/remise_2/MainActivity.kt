@@ -39,10 +39,9 @@ class MainActivity : ComponentActivity() {
 }
 
 
-
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun AppPreview() {
     Remise_2Theme {
         App()
     }

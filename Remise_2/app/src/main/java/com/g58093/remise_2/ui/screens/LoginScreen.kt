@@ -1,7 +1,6 @@
 package com.g58093.remise_2.ui.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
@@ -14,10 +13,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.g58093.remise_2.ui.LoginViewModel
 import com.g58093.remise_2.R
+import com.g58093.remise_2.ui.App
+import com.g58093.remise_2.ui.theme.Remise_2Theme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,49 +30,61 @@ fun LoginScreen(
 
     val loginState by loginViewModel.uiState.collectAsState()
 
-    LaunchedEffect(loginState.isEmailWrong) {
-        if (loginState.isEmailWrong == false) {
+    LaunchedEffect(loginState.authenticated) {
+        if (loginState.authenticated) {
             navigateToHome()
         }
     }
 
-    Row(
-        modifier = Modifier.fillMaxSize(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
-    ) {
         Column(
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
         ) {
             TextField(
                 value = loginViewModel.userEmail,
                 onValueChange = { loginViewModel.updateUserEmail(it) },
-                keyboardActions = KeyboardActions( // Enter ?
-                    onDone = { loginViewModel.isEmailValid() }
-                ),
+                singleLine = true,
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            TextField(
+                value = loginViewModel.userPassword,
+                onValueChange = { loginViewModel.updateUserPassword(it) },
                 singleLine = true,
             )
 
-            if (loginState.isEmailWrong == true) {
+            if (loginState.isEmailWrong) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = stringResource(R.string.error),
                     color = Color.Red
                 )
+            } else if(!loginState.isCredentialsCorrect) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = stringResource(R.string.errorAuth),
+                    color = Color.Red
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Button(
+                onClick = {
+                    loginViewModel.submitCredentials()
+                    loginViewModel.isEmailValid()
+                },
+                modifier = Modifier
+                    .padding(8.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.ok),
+                    color = Color.White
+                )
             }
         }
-
-        Button(
-            onClick = {
-                loginViewModel.isEmailValid()
-            },
-            modifier = Modifier.padding(3.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.ok),
-                color = Color.White
-            )
-        }
-    }
 }
+
+
+
+
 
