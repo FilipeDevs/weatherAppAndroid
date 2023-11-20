@@ -7,4 +7,7 @@
     <string name="ok">OK</string>
     <string name="error">Error, the email is not valid</string>
     <string name="errorAuth">Error, wrong password or email</string>
+    <string name="myName">Filipe Pereira</string>
+    <string name="matricule">58093</string>
+    <string name="groupe">E11</string>
 </resources>
