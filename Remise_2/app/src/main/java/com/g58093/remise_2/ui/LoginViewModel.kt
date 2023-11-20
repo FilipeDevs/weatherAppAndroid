@@ -36,40 +36,41 @@ class LoginViewModel : ViewModel() {
         this.userPassword = userPassword
     }
 
-    fun isEmailValid() {
+    fun isEmailValid() : Boolean {
         val isEmailCorrect = android.util.Patterns.EMAIL_ADDRESS.matcher(userEmail).matches()
         _uiState.update { currentState -> currentState.copy(isEmailWrong = !isEmailCorrect) }
+        return isEmailCorrect
     }
 
     fun submitCredentials() {
-        val authRequest = AuthRequest(this.userEmail, this.userPassword)
-        Log.d("Auth", authRequest.toString())
-        viewModelScope.launch {
-            try {
-                val call = AuthApi.authApiService.authenticate(authRequest)
+        if(isEmailValid()) { // only make api call when email is valid
+            val authRequest = AuthRequest(this.userEmail, this.userPassword)
+            Log.d("Auth", authRequest.toString())
+            viewModelScope.launch {
+                try {
+                    val call = AuthApi.authApiService.authenticate(authRequest)
 
-                call.enqueue(object : Callback<Void> {
-                    override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                        if (response.isSuccessful) {
-                            val statusCode = response.code()
-                            _uiState.update { currentState -> currentState.copy(authenticated = true) }
-                        } else {
+                    call.enqueue(object : Callback<Void> {
+                        override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                            if (response.isSuccessful) {
+                                val statusCode = response.code()
+                                _uiState.update { currentState -> currentState.copy(authenticated = true) }
+                            } else {
+                                val errorBody = response.errorBody()?.string()
+                                Log.e("Failed", "Error Body: $errorBody")
+                                _uiState.update { currentState -> currentState.copy(isCredentialsCorrect = false) }
+                            }
+                        }
 
-                            val errorBody = response.errorBody()?.string()
-                            Log.e("Failed", "Error Body: $errorBody")
+                        override fun onFailure(call: Call<Void>, t: Throwable) {
+                            Log.e("Failed", "Throwable: ${t.message}")
                             _uiState.update { currentState -> currentState.copy(isCredentialsCorrect = false) }
                         }
-                    }
-
-                    override fun onFailure(call: Call<Void>, t: Throwable) {
-                        Log.e("Failed", "Throwable: ${t.message}")
-                        _uiState.update { currentState -> currentState.copy(isCredentialsCorrect = false) }
-                    }
-                })
-            } catch (t: Throwable) {
-                Log.e("Failed", "Throwable: ${t.message}")
-                _uiState.update { currentState -> currentState.copy(isCredentialsCorrect = false) }
-            }
+                    })
+                } catch (t: Throwable) {
+                    Log.e("Failed", "Throwable: ${t.message}")
+                    _uiState.update { currentState -> currentState.copy(isCredentialsCorrect = false) }
+                } }
         }
     }
 

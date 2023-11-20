@@ -71,7 +71,6 @@ fun LoginScreen(
             Button(
                 onClick = {
                     loginViewModel.submitCredentials()
-                    loginViewModel.isEmailValid()
                 },
                 modifier = Modifier
                     .padding(8.dp)
