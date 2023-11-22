@@ -22,7 +22,7 @@ L'application utilise la base de données locale pour stocker et gérer les vill
 
 ## Service rest
 
-L'application fait usage de l'API Weather App pour fournir des données météorologiques en temps réel.
+L'application fait usage de l'API [OpenWeather](https://openweathermap.org/api) pour fournir des données météorologiques en temps réel.
 
 ## Auteur
 
