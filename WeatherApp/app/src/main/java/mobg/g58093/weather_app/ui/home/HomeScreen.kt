@@ -2,7 +2,6 @@ package mobg.g58093.weather_app.ui.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -127,7 +125,7 @@ fun HomeScreen(
             }
             // Weather Icon
             AsyncImage(
-                modifier = Modifier.width(142.dp).height(142.dp),
+                modifier = Modifier.width(200.dp).height(200.dp),
                 model = "https://openweathermap.org/img/wn/11d@2x.png",
                 placeholder = painterResource(id = R.drawable.deviconweather),
                 contentDescription = "The delasign logo",
