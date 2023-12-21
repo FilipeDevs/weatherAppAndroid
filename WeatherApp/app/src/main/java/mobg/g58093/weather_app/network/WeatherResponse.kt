@@ -8,9 +8,9 @@ data class WeatherResponse(
     val main : MainWeatherInfo,
     val weather: List<WeatherInfo>,
     val sys: SysInfo,
-   val wind: WindInfo,
+    val wind: WindInfo,
     val visibility: Int,
-   val rain: RainInfo?, // Nullable because "rain" field may not always be present
+    //val rain: RainInfo?, // Nullable because "rain" field may not always be present
 )
 
 @Serializable

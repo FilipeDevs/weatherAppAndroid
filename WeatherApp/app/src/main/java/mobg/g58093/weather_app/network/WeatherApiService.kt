@@ -22,6 +22,7 @@ interface WeatherApiService {
     suspend fun getWeatherByCoordinates(
         @Query("lat") latitude: Double,
         @Query("lon") longitude: Double,
+        @Query("units") units : String,
         @Query("appid") apiKey: String
     ): WeatherResponse
 }
@@ -29,12 +30,16 @@ interface WeatherApiService {
 object RetroApi {
     private const val BASE_URL = "https://api.openweathermap.org/"
 
+    private val json = Json {
+        ignoreUnknownKeys = true
+    }
+
     val weatherService: WeatherApiService by lazy {
         retrofit.create(WeatherApiService::class.java)
     }
 
     private val retrofit = Retrofit.Builder()
-        .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
+        .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
         .baseUrl(BASE_URL)
         .build()
 
