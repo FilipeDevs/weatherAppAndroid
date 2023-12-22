@@ -14,16 +14,22 @@ abstract class WeatherEntriesDatabase : RoomDatabase() {
     abstract fun weatherDao(): WeatherDao
 
     companion object {
-        @Volatile
-        private var Instance: WeatherEntriesDatabase? = null
 
-        fun getDatabase(context: Context): WeatherEntriesDatabase {
-            // if the Instance is not null, return it, otherwise create a new database instance.
-            return Instance ?: synchronized(this) {
-                Room.databaseBuilder(context, WeatherEntriesDatabase::class.java, "weather_entries_database")
-                    .build()
-                    .also { Instance = it }
+        private const val DATABASE_NAME = "weather_entries"
+        private var sInstance: WeatherEntriesDatabase? = null
+
+        fun getInstance(context: Context): WeatherEntriesDatabase {
+            if (sInstance == null) {
+
+                val dbBuilder = Room.databaseBuilder(
+                    context.applicationContext,
+                    WeatherEntriesDatabase::class.java,
+                    DATABASE_NAME
+                )
+                sInstance = dbBuilder.build()
+
             }
+            return sInstance!!
         }
     }
 }

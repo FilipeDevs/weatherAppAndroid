@@ -13,14 +13,14 @@ interface WeatherDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertWeatherEntry(item: WeatherEntry)
 
-    @Query("SELECT * from WeatherEntries")
+    @Query("SELECT * from weather_entries")
     suspend fun getAllWeatherEntries(): List<WeatherEntry>
 
-    @Query("SELECT * from WeatherEntries WHERE locationName = :name")
-    fun getWeatherEntry(name : String) : Flow<WeatherEntry>
+    @Query("SELECT * from weather_entries WHERE locationName = :name")
+    fun getWeatherEntry(name : String) : WeatherEntry
 
-    @Query("SELECT * from WeatherEntries WHERE currentLocation = 1")
-    fun getWeatherEntryCurrentLocation() : Flow<WeatherEntry>
+    @Query("SELECT * from weather_entries WHERE currentLocation = 1")
+    fun getWeatherEntryCurrentLocation() : WeatherEntry
 
     @Delete
     suspend fun deleteWeatherEntry(item: WeatherEntry)

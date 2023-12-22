@@ -18,7 +18,7 @@ data class WeatherEntry (
 
     val latitude : Double,
 
-    val date : Date,
+    val date : String,
 
     val mainTemp : Int,
 
@@ -28,17 +28,17 @@ data class WeatherEntry (
 
     val weatherType : String,
 
+    val weatherIcon : String,
+
     val sunriseHour : String,
 
     val sunsetHour : String,
-
-    val precipitation : Double,
 
     val wind : Double,
 
     val humidity : Int,
 
-    val visibility : Double,
+    val visibility : Int,
 
     val pressure : Int,
 
