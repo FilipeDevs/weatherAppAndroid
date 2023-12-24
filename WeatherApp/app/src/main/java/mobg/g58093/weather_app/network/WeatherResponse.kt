@@ -2,6 +2,7 @@ package mobg.g58093.weather_app.network
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import mobg.g58093.weather_app.data.WeatherEntry
 
 @Serializable
 data class WeatherResponse(

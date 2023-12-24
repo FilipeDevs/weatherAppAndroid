@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -24,6 +25,9 @@ interface WeatherDao {
 
     @Delete
     suspend fun deleteWeatherEntry(item: WeatherEntry)
+
+    @Update
+    suspend fun updateWeatherEntry(weatherEntry: WeatherEntry)
 
 
 }

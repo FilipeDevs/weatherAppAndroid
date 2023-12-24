@@ -44,3 +44,5 @@ data class WeatherEntry (
 
     val currentLocation : Boolean
     )
+
+

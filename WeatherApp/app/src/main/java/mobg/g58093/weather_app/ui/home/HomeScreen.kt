@@ -77,7 +77,7 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.height(20.dp))
                     // Current temperature
                     Text(
-                        text = (weatherState as WeatherApiState.Success).data.main.temp.toInt().toString() + "°C",
+                        text = (weatherState as WeatherApiState.Success).data.mainTemp.toString() + "°C",
                         style = TextStyle(
                             fontSize = 96.sp,
                             fontWeight = FontWeight(400),

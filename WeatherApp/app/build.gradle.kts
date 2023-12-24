@@ -66,6 +66,8 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.6")
     implementation("io.coil-kt:coil-compose:2.4.0")
 
+    implementation ("com.google.android.gms:play-services-location:21.0.1")
+
     // Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     // Retrofit with Kotlin serialization Converter
@@ -77,9 +79,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
 
     // room
-    implementation ("androidx.room:room-runtime:2.6.0")
-    kapt("androidx.room:room-compiler:2.6.0")
-    implementation ("androidx.room:room-ktx:2.6.0")
+    implementation ("androidx.room:room-runtime:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
+    implementation ("androidx.room:room-ktx:2.6.1")
 
 
     testImplementation("junit:junit:4.13.2")

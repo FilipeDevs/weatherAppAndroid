@@ -39,8 +39,12 @@ object WeatherRepository {
         return null
     }
 
-    suspend fun deleteWeatherEntry(item: WeatherEntry) {
-        database?.weatherDao()?.deleteWeatherEntry(item)
+    suspend fun deleteWeatherEntry(weather: WeatherEntry) {
+        database?.weatherDao()?.deleteWeatherEntry(weather)
+    }
+
+    suspend fun updateWeatherEntry(weather: WeatherEntry) {
+        database?.weatherDao()?.updateWeatherEntry(weather)
     }
 
 }
