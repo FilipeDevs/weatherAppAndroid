@@ -1,21 +1,9 @@
 package mobg.g58093.weather_app.ui.home
 
-import android.Manifest
 import android.app.Application
-import android.content.Context
-import android.content.pm.PackageManager
-import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
 import android.util.Log
-import android.widget.Toast
-import androidx.core.app.ActivityCompat
-import androidx.core.app.ComponentActivity
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,8 +11,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import mobg.g58093.weather_app.LatandLong
-import mobg.g58093.weather_app.MainActivity
 import mobg.g58093.weather_app.data.WeatherEntry
 import mobg.g58093.weather_app.data.WeatherRepository
 import mobg.g58093.weather_app.getUserLocation
@@ -55,29 +41,21 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     private val TAG = "HomeViewModel"
 
-    private var currentLocation : LatandLong = LatandLong()
-
     init {
-        var weatherEntry : WeatherEntry?
         viewModelScope.launch {
-            if (locationState.value.selectedLocation == "currentLocation") {
-                getUserLocation(context) { location ->
-                    Log.d("LocationUpdate", "Location received: ${location.latitude}")
-                    currentLocation = LatandLong(latitude = location.latitude, longitude = location.longitude)
+            getUserLocation(context) { locationState ->
+                if (locationState.isLocationPermissionGranted) {
+                    _locationState.update { currentState -> currentState.copy(longitude = locationState.longitude) }
+                    _locationState.update { currentState -> currentState.copy(latitude = locationState.latitude) }
                     getWeatherByCoordinates(
-                        location.latitude,  location.longitude, "metric",
-                        "58701429b6088e321356701fde1e7ed0", false)
-                }
-                Log.d("LocationUpdate", "Location received after callback: ${currentLocation.latitude}")
-            } else {
-                weatherEntry = WeatherRepository.getWeatherEntry(locationState.value.selectedLocation)
-                weatherEntry?.let {
-                    getWeatherByCoordinates(
-                        it.latitude, it.longitude, "metric",
-                        "58701429b6088e321356701fde1e7ed0", false)
+                        locationState.latitude, locationState.longitude, "metric",
+                        "58701429b6088e321356701fde1e7ed0", false
+                    )
+                } else {
+                    // Handle the case where location permission is not granted
+                    _weatherState.value = WeatherApiState.Error("Location permission not granted.")
                 }
             }
-
         }
     }
 
@@ -88,7 +66,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
                 if (isOnline(context)) {
                     val response = RetroApi.weatherService.getWeatherByCoordinates(latitude, longitude, units, apiKey)
-
+                    _locationState.update { currentState -> currentState.copy(selectedLocation = response.name) }
                     withContext(Dispatchers.IO) {
                         val existingWeatherEntryId = WeatherRepository.getWeatherEntry(response.name)?.id ?: 0
                         val weatherEntry = convertWeatherResponseToWeatherEntry(response, existingWeatherEntryId, isCurrentLocation)
@@ -103,11 +81,11 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
                 } else {
                     // Load data from the local database
-
                     withContext(Dispatchers.IO) {
                         val localWeatherEntry = WeatherRepository.getWeatherEntry(locationState.value.selectedLocation)
                         if (localWeatherEntry != null) {
                             _weatherState.value = WeatherApiState.Success(localWeatherEntry)
+                            _locationState.update { currentState -> currentState.copy(selectedLocation = localWeatherEntry.locationName) }
                         } else {
                             _weatherState.value = WeatherApiState.Error("No internet connection and no data in the database.")
                         }
@@ -122,7 +100,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     fun convertCurrentDateToFormattedDate(): String {
         val date = Date()
-        val sdf = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
+        val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
         return sdf.format(date)
     }
 
@@ -152,6 +130,14 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             pressure = weatherResponse.main.pressure,
             currentLocation = isCurrentLocation,
         )
+    }
+
+    fun refreshData() {
+        viewModelScope.launch {
+            getWeatherByCoordinates(
+                locationState.value.latitude,  locationState.value.longitude, "metric",
+                    "58701429b6088e321356701fde1e7ed0", false)
+        }
     }
 
 }

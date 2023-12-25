@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -31,6 +32,9 @@ import mobg.g58093.weather_app.network.WeatherResponse
 import mobg.g58093.weather_app.ui.common.TopAppBar
 import mobg.g58093.weather_app.ui.navigation.NavigationDestination
 import mobg.g58093.weather_app.ui.theme.Weather_appTheme
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 object HomeDestination : NavigationDestination {
     override val route = "home"
@@ -42,21 +46,13 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     homeViewModel: HomeViewModel = viewModel(),
     navigateToDetails: () -> Unit,
-    navigateToHome: () -> Unit,
-    //navigateToLocations : () -> Unit,
     )
 {
-    val weatherState by homeViewModel.weatherState.collectAsState()
+        val weatherState by homeViewModel.weatherState.collectAsState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(navigateToHome = navigateToHome)
-        }
-    ) { innerPadding ->
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
+                .fillMaxSize(),
             verticalArrangement = Arrangement.Center, // Center vertically
             horizontalAlignment = Alignment.CenterHorizontally // Center horizontally
         ) {
@@ -67,7 +63,7 @@ fun HomeScreen(
                 is WeatherApiState.Success -> {
                     // Date
                     Text(
-                        text = "Monday, 13 Nov 2023",
+                        text = convertCurrentDateToFormattedDate(),
                         style = TextStyle(
                             fontSize = 18.sp,
                             fontWeight = FontWeight(400),
@@ -100,7 +96,7 @@ fun HomeScreen(
                                 )
                                 Spacer(modifier = Modifier.width(2.dp))
                                 Text(
-                                    text = "5°C",
+                                    text = (weatherState as WeatherApiState.Success).data.lowTemp.toString() + "°C",
                                     style = TextStyle(
                                         fontSize = 18.sp,
                                         fontWeight = FontWeight(400),
@@ -123,7 +119,7 @@ fun HomeScreen(
                                 )
                                 Spacer(modifier = Modifier.width(2.dp))
                                 Text(
-                                    text = "13°C",
+                                    text = (weatherState as WeatherApiState.Success).data.highTemp.toString() + "°C",
                                     style = TextStyle(
                                         fontSize = 18.sp,
                                         fontWeight = FontWeight(400),
@@ -133,25 +129,27 @@ fun HomeScreen(
                             }
 
                         }
-
                     }
                     // Weather Icon
                     AsyncImage(
-                        modifier = Modifier.width(200.dp).height(200.dp),
-                        model = "https://openweathermap.org/img/wn/11d@2x.png",
+                        modifier = Modifier
+                            .width(230.dp)
+                            .height(230.dp),
+                        model = "https://openweathermap.org/img/wn/${(weatherState as WeatherApiState.Success).data.weatherIcon}@2x.png",
                         placeholder = painterResource(id = R.drawable.deviconweather),
                         contentDescription = "The delasign logo",
                     )
 
                     Text(
-                        text = "Heavy Rain",
+                        text = (weatherState as WeatherApiState.Success).data.weatherType,
                         style = TextStyle(
                             fontSize = 18.sp,
                             fontWeight = FontWeight(400),
                             color = Color(0xFF616161),
                         )
                     )
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(15.dp))
+                    // Sunrise and Sunset
                     Row(
                     ) {
                         Column {
@@ -166,7 +164,7 @@ fun HomeScreen(
                                 )
                                 Spacer(modifier = Modifier.width(2.dp))
                                 Text(
-                                    text = "09:18 AM",
+                                    text = (weatherState as WeatherApiState.Success).data.sunriseHour,
                                     style = TextStyle(
                                         fontSize = 18.sp,
                                         fontWeight = FontWeight(400),
@@ -176,7 +174,7 @@ fun HomeScreen(
                             }
 
                         }
-                        Spacer(modifier = Modifier.width(24.dp))
+                        Spacer(modifier = Modifier.width(20.dp))
                         Column {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Image(
@@ -189,7 +187,7 @@ fun HomeScreen(
                                 )
                                 Spacer(modifier = Modifier.width(2.dp))
                                 Text(
-                                    text = "06:32 PM",
+                                    text = (weatherState as WeatherApiState.Success).data.sunsetHour,
                                     style = TextStyle(
                                         fontSize = 18.sp,
                                         fontWeight = FontWeight(400),
@@ -200,15 +198,41 @@ fun HomeScreen(
 
                         }
                     }
-                    Spacer(modifier = Modifier.height(80.dp))
+                    Spacer(modifier = Modifier.height(40.dp))
+                    Button(
+                        onClick = navigateToDetails,
+                        modifier = Modifier.padding(8.dp)
+                    ) {
+                        Text(
+                            text = "Details",
+                            style = TextStyle(
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight(400),
+                                color = Color(0xFF616161),
+                            )
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
                     Text(
-                        text = "Details",
+                        text = "Last updated : " + (weatherState as WeatherApiState.Success).data.date,
                         style = TextStyle(
-                            fontSize = 24.sp,
+                            fontSize = 18.sp,
                             fontWeight = FontWeight(400),
                             color = Color(0xFF616161),
                         )
                     )
+                    Spacer(modifier = Modifier.height(5.dp))
+                    Button(
+                        onClick = { homeViewModel.refreshData() },
+                        modifier = Modifier.padding(8.dp)
+
+                    ) {
+                        Text(
+                            text = "Refresh",
+                            color = Color.White
+                        )
+                    }
                 }
                 is WeatherApiState.Error -> {
                     // Show error state
@@ -220,5 +244,12 @@ fun HomeScreen(
             }
 
         }
-    }
 }
+
+
+fun convertCurrentDateToFormattedDate(): String {
+    val date = Date()
+    val sdf = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
+    return sdf.format(date)
+}
+

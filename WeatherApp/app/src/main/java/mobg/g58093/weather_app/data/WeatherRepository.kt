@@ -1,6 +1,7 @@
 package mobg.g58093.weather_app.data
 
 import android.content.Context
+import android.util.Log
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.Flow
 
@@ -9,6 +10,8 @@ object WeatherRepository {
     private var database : WeatherEntriesDatabase? = null
 
     fun initDatabase(context: Context){
+        Log.d("WeatherRepository", "initDatabase")
+        Log.d("WeatherRepository", "database ${database}")
         if (database == null) {
             database = WeatherEntriesDatabase.getInstance(context)
         }

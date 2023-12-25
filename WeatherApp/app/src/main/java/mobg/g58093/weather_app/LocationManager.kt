@@ -5,20 +5,14 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Looper
 import android.util.Log
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
-import java.util.concurrent.TimeUnit
 import android.Manifest
+import android.widget.Toast
 
 /**
  * Manages all location related tasks for the app.
@@ -30,24 +24,9 @@ lateinit var locationProvider: FusedLocationProviderClient
 
 var LOCATION_TAG = "getUserLocation()"
 
-interface LocationResultCallback {
-    fun onLocationResult(location: LatandLong)
-}
-
 @SuppressLint("MissingPermission")
-fun getUserLocation(context: Context, callback: (LatandLong) -> Unit) {
+fun getUserLocation(context: Context, callback: (LocationState) -> Unit) {
     val locationProvider = LocationServices.getFusedLocationProviderClient(context)
-    var currentUserLocation: LatandLong = LatandLong()
-
-    val locationCallback = object : LocationCallback() {
-        override fun onLocationResult(result: LocationResult) {
-            for (location in result.locations) {
-                currentUserLocation = LatandLong(location.latitude, location.longitude)
-                Log.d(LOCATION_TAG, "${location.latitude},${location.longitude}")
-            }
-            callback(currentUserLocation)
-        }
-    }
 
     if (hasPermissions(
             context,
@@ -55,12 +34,30 @@ fun getUserLocation(context: Context, callback: (LatandLong) -> Unit) {
             Manifest.permission.ACCESS_COARSE_LOCATION
         )
     ) {
+        val locationCallback = object : LocationCallback() {
+            override fun onLocationResult(result: LocationResult) {
+                val location = result.locations.firstOrNull()
+                if (location != null) {
+                    val locationState = LocationState(
+                        latitude = location.latitude,
+                        longitude = location.longitude,
+                        isLocationPermissionGranted = true
+                    )
+                    callback(locationState)
+                }
+            }
+        }
         locationUpdate(locationProvider, locationCallback)
+    } else {
+        // Permission not granted
+        val locationState = LocationState(isLocationPermissionGranted = false)
+        callback(locationState)
     }
 }
 
-fun stopLocationUpdate(locationProvider: FusedLocationProviderClient, locationCallback: LocationCallback) {
+fun stopLocationUpdate() {
     try {
+        //Removes all location updates for the given callback.
         val removeTask = locationProvider.removeLocationUpdates(locationCallback)
         removeTask.addOnCompleteListener { task ->
             if (task.isSuccessful) {
@@ -77,22 +74,31 @@ fun stopLocationUpdate(locationProvider: FusedLocationProviderClient, locationCa
 @SuppressLint("MissingPermission")
 fun locationUpdate(locationProvider: FusedLocationProviderClient, locationCallback: LocationCallback) {
     val locationRequest: LocationRequest = LocationRequest.create().apply {
-        interval = TimeUnit.SECONDS.toMillis(60)
-        fastestInterval = TimeUnit.SECONDS.toMillis(30)
-        maxWaitTime = TimeUnit.MINUTES.toMillis(2)
         priority = LocationRequest.PRIORITY_HIGH_ACCURACY
     }
 
     locationProvider.requestLocationUpdates(
         locationRequest,
-        locationCallback,
+        object : LocationCallback() {
+            override fun onLocationResult(result: LocationResult) {
+                // Process the first location result
+                val location = result.locations.firstOrNull()
+                if (location != null) {
+                    locationCallback.onLocationResult(LocationResult.create(listOf(location)))
+                    // Remove updates after the first location
+                    locationProvider.removeLocationUpdates(this)
+                }
+            }
+        },
         Looper.getMainLooper()
     )
 }
 
-data class LatandLong(
+data class LocationState(
     val latitude: Double = 0.0,
-    val longitude: Double = 0.0
+    val longitude: Double = 0.0,
+    val selectedLocation: String = "",
+    val isLocationPermissionGranted: Boolean = false // New flag
 )
 
 fun hasPermissions(context: Context, vararg permissions: String): Boolean {
@@ -106,11 +112,5 @@ fun hasPermissions(context: Context, vararg permissions: String): Boolean {
     return true
 }
 
-fun askPermissions(
-    activity: Context
-) {
-    //ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,
-        //Manifest.permission.ACCESS_COARSE_LOCATION), locationPermissionCode)
-}
 
 
