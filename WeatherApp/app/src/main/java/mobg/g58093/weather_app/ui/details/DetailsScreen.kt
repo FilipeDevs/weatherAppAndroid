@@ -17,12 +17,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import mobg.g58093.weather_app.ui.navigation.NavigationDestination
 import mobg.g58093.weather_app.ui.theme.Weather_appTheme
 
-object DetailsDestination : NavigationDestination {
-    override val route = "details"
-}
 @Composable
 fun DetailsScreen(
     modifier: Modifier = Modifier,

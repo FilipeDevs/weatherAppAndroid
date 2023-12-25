@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -19,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import mobg.g58093.weather_app.R
 import mobg.g58093.weather_app.ui.theme.Weather_appTheme
@@ -26,6 +28,7 @@ import mobg.g58093.weather_app.ui.theme.Weather_appTheme
 @Composable
 fun ForecastScreen(
     modifier: Modifier = Modifier,
+    forecastViewModel: ForecastViewModel = viewModel(),
 )
 {
         Column(
@@ -69,7 +72,9 @@ fun ForecastScreen(
                 Spacer(modifier = Modifier.width(50.dp))
                 // Weather Icon
                 AsyncImage(
-                    modifier = Modifier.width(50.dp).height(50.dp),
+                    modifier = Modifier
+                        .width(50.dp)
+                        .height(50.dp),
                     model = "https://openweathermap.org/img/wn/11d@2x.png",
                     placeholder = painterResource(id = R.drawable.deviconweather),
                     contentDescription = "The delasign logo",
@@ -92,6 +97,9 @@ fun ForecastScreen(
                         color = Color(0xFFFFFFFF),
                         )
                 )
+                Button(onClick = { forecastViewModel.logState() }) {
+                    Text(text = "Test")
+                }
             }
         }
 

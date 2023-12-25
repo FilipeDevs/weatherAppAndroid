@@ -18,6 +18,8 @@ import mobg.g58093.weather_app.network.RetroApi
 import mobg.g58093.weather_app.network.WeatherResponse
 import mobg.g58093.weather_app.network.isOnline
 import mobg.g58093.weather_app.ui.LocationState
+import mobg.g58093.weather_app.ui.common.SelectedCityViewModel
+import mobg.g58093.weather_app.ui.common.SelectedLocationState
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -31,7 +33,7 @@ sealed class WeatherApiState {
 
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val context = getApplication<Application>().applicationContext
+    private val context = application
 
     private val _weatherState = MutableStateFlow<WeatherApiState>(WeatherApiState.Loading)
     val weatherState: StateFlow<WeatherApiState> = _weatherState
@@ -45,8 +47,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             getUserLocation(context) { locationState ->
                 if (locationState.isLocationPermissionGranted) {
-                    _locationState.update { currentState -> currentState.copy(longitude = locationState.longitude) }
-                    _locationState.update { currentState -> currentState.copy(latitude = locationState.latitude) }
                     getWeatherByCoordinates(
                         locationState.latitude, locationState.longitude, "metric",
                         "58701429b6088e321356701fde1e7ed0", false
@@ -85,7 +85,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                         val localWeatherEntry = WeatherRepository.getWeatherEntry(locationState.value.selectedLocation)
                         if (localWeatherEntry != null) {
                             _weatherState.value = WeatherApiState.Success(localWeatherEntry)
-                            _locationState.update { currentState -> currentState.copy(selectedLocation = localWeatherEntry.locationName) }
                         } else {
                             _weatherState.value = WeatherApiState.Error("No internet connection and no data in the database.")
                         }
