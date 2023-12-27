@@ -22,13 +22,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import mobg.g58093.weather_app.AppViewModelProvider
 import mobg.g58093.weather_app.R
 import mobg.g58093.weather_app.ui.theme.Weather_appTheme
 
 @Composable
 fun ForecastScreen(
     modifier: Modifier = Modifier,
-    forecastViewModel: ForecastViewModel = viewModel(),
+    forecastViewModel: ForecastViewModel = viewModel(factory = AppViewModelProvider.Factory),
 )
 {
         Column(
@@ -97,9 +98,6 @@ fun ForecastScreen(
                         color = Color(0xFFFFFFFF),
                         )
                 )
-                Button(onClick = { forecastViewModel.logState() }) {
-                    Text(text = "Test")
-                }
             }
         }
 

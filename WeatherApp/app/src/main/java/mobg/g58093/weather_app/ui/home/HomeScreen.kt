@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import mobg.g58093.weather_app.AppViewModelProvider
 import mobg.g58093.weather_app.R
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -36,7 +37,7 @@ import java.util.Locale
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    homeViewModel: HomeViewModel = viewModel(),
+    homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
     navigateToDetails: () -> Unit,
     )
 {

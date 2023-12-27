@@ -23,6 +23,9 @@ interface WeatherDao {
     @Query("SELECT * from weather_entries WHERE currentLocation = 1")
     fun getWeatherEntryCurrentLocation() : WeatherEntry
 
+    @Query("SELECT * FROM weather_entries WHERE currentLocation = 0 LIMIT 1")
+    suspend fun getFirstNonCurrentLocationEntry(): WeatherEntry?
+
     @Delete
     suspend fun deleteWeatherEntry(item: WeatherEntry)
 

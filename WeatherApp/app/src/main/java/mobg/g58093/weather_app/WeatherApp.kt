@@ -16,12 +16,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import mobg.g58093.weather_app.ui.common.SelectedCityViewModel
 import mobg.g58093.weather_app.ui.details.DetailsScreen
 import mobg.g58093.weather_app.ui.forecast.ForecastScreen
 import mobg.g58093.weather_app.ui.home.HomeScreen
@@ -73,7 +71,6 @@ fun WeatherApp() {
     val currentScreen = WeatherAppScreen.valueOf(
         backStackEntry?.destination?.route ?: WeatherAppScreen.Home.name
     )
-
     Scaffold(
         topBar = {
             TopAppBar(

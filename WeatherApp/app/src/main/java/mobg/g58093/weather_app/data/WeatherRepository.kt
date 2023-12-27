@@ -35,6 +35,13 @@ object WeatherRepository {
         return null
     }
 
+    suspend fun getFirstNonCurrentLocationEntry(): WeatherEntry? {
+        database?.let { theDatabase ->
+            return theDatabase.weatherDao().getFirstNonCurrentLocationEntry()
+        }
+        return null
+    }
+
     suspend fun getWeatherEntryCurrentLocation(): WeatherEntry? {
         database?.let { theDatabase ->
             return theDatabase.weatherDao().getWeatherEntryCurrentLocation()
