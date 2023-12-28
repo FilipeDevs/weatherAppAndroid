@@ -24,24 +24,21 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import mobg.g58093.weather_app.AppViewModelProvider
 import mobg.g58093.weather_app.R
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    homeViewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    weatherViewModel: WeatherViewModel,
     navigateToDetails: () -> Unit,
     )
 {
-        val weatherState by homeViewModel.weatherState.collectAsState()
+        val weatherState by weatherViewModel.weatherState.collectAsState()
 
         Column(
             modifier = Modifier
@@ -217,7 +214,7 @@ fun HomeScreen(
                     )
                     Spacer(modifier = Modifier.height(5.dp))
                     Button(
-                        onClick = { homeViewModel.refreshData() },
+                        onClick = { weatherViewModel.refreshData() },
                         modifier = Modifier.padding(8.dp)
 
                     ) {

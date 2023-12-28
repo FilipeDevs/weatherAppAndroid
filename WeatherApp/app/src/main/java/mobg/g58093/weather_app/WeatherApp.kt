@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -23,6 +24,7 @@ import androidx.navigation.compose.rememberNavController
 import mobg.g58093.weather_app.ui.details.DetailsScreen
 import mobg.g58093.weather_app.ui.forecast.ForecastScreen
 import mobg.g58093.weather_app.ui.home.HomeScreen
+import mobg.g58093.weather_app.ui.home.WeatherViewModel
 
 enum class WeatherAppScreen(@StringRes val title: Int) {
     Home(title = R.string.home),
@@ -71,6 +73,7 @@ fun WeatherApp() {
     val currentScreen = WeatherAppScreen.valueOf(
         backStackEntry?.destination?.route ?: WeatherAppScreen.Home.name
     )
+    val weatherViewModel : WeatherViewModel = viewModel(factory = AppViewModelProvider.Factory)
     Scaffold(
         topBar = {
             TopAppBar(
@@ -88,7 +91,7 @@ fun WeatherApp() {
                 HomeScreen(navigateToDetails = {navController.navigate(WeatherAppScreen.Details.name)},
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(innerPadding))
+                        .padding(innerPadding), weatherViewModel = weatherViewModel)
             }
 
             // Details
@@ -96,7 +99,7 @@ fun WeatherApp() {
                 DetailsScreen(navigateToForecast = {navController.navigate(WeatherAppScreen.Forecast.name)},
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(innerPadding))
+                        .padding(innerPadding), weatherViewModel = weatherViewModel)
             }
             // Forecast
             composable(route = WeatherAppScreen.Forecast.name) {

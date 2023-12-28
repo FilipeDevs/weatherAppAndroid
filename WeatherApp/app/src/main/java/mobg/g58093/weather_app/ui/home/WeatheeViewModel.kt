@@ -3,13 +3,10 @@ package mobg.g58093.weather_app.ui.home
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import mobg.g58093.weather_app.SelectedLocationRepository
@@ -31,7 +28,7 @@ sealed class WeatherApiState {
     data class Error(val message: String) : WeatherApiState()
 }
 
-class HomeViewModel(application: Application, private val selectedLocationRepository: SelectedLocationRepository) : AndroidViewModel(application) {
+class WeatherViewModel(application: Application, private val selectedLocationRepository: SelectedLocationRepository) : AndroidViewModel(application) {
 
     private var selectedLocation = SelectedLocationState()
 
