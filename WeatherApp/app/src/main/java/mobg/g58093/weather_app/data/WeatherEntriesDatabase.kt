@@ -15,7 +15,7 @@ abstract class WeatherEntriesDatabase : RoomDatabase() {
 
     companion object {
 
-        private const val DATABASE_NAME = "weather_entries"
+        private const val DATABASE_NAME = "weather_entries_database"
         private var sInstance: WeatherEntriesDatabase? = null
 
         fun getInstance(context: Context): WeatherEntriesDatabase {

@@ -6,24 +6,29 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface WeatherDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertWeatherEntry(item: WeatherEntry)
+    suspend fun insertWeatherEntry(weather: WeatherEntry)
 
-    @Query("SELECT * from weather_entries")
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertForecastEntry(forecast: ForecastEntry)
+
+    @Query("SELECT * from main_weather")
     suspend fun getAllWeatherEntries(): List<WeatherEntry>
 
-    @Query("SELECT * from weather_entries WHERE locationName = :name")
+    @Query("SELECT * from forecast_weather WHERE locationName = :name")
+    suspend fun getAllForecastEntriesByLocation(name : String): List<ForecastEntry>
+
+    @Query("SELECT * from main_weather WHERE locationName = :name")
     fun getWeatherEntry(name : String) : WeatherEntry
 
-    @Query("SELECT * from weather_entries WHERE currentLocation = 1")
+    @Query("SELECT * from main_weather WHERE currentLocation = 1")
     fun getWeatherEntryCurrentLocation() : WeatherEntry
 
-    @Query("SELECT * FROM weather_entries WHERE currentLocation = 0 LIMIT 1")
+    @Query("SELECT * FROM main_weather WHERE currentLocation = 0 LIMIT 1")
     suspend fun getFirstNonCurrentLocationEntry(): WeatherEntry?
 
     @Delete
@@ -31,6 +36,9 @@ interface WeatherDao {
 
     @Update
     suspend fun updateWeatherEntry(weatherEntry: WeatherEntry)
+
+    @Update
+    suspend fun updateForecastEntry(forecast: ForecastEntry)
 
 
 }

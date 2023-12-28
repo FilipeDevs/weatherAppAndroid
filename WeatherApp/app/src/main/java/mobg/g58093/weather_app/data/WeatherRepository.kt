@@ -21,6 +21,10 @@ object WeatherRepository {
         database?.weatherDao()?.insertWeatherEntry(weatherEntry)
     }
 
+    suspend fun insertForecastEntry(forecast: ForecastEntry){
+        database?.weatherDao()?.insertForecastEntry(forecast)
+    }
+
     suspend fun getAllWeatherEntries() : List<WeatherEntry> {
         database?.let { theDatabase ->
             return theDatabase.weatherDao().getAllWeatherEntries()
@@ -28,6 +32,12 @@ object WeatherRepository {
         return listOf()
     }
 
+    suspend fun getAllForecastsByLocation(locationName: String) : List<ForecastEntry> {
+        database?.let { theDatabase ->
+            return theDatabase.weatherDao().getAllForecastEntriesByLocation(locationName)
+        }
+        return listOf()
+    }
     suspend fun getWeatherEntry(locationName: String): WeatherEntry? {
         database?.let { theDatabase ->
             return theDatabase.weatherDao().getWeatherEntry(locationName)
@@ -55,6 +65,10 @@ object WeatherRepository {
 
     suspend fun updateWeatherEntry(weather: WeatherEntry) {
         database?.weatherDao()?.updateWeatherEntry(weather)
+    }
+
+    suspend fun updateForecastEntry(forecast: ForecastEntry) {
+        database?.weatherDao()?.updateForecastEntry(forecast)
     }
 
 }

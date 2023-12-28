@@ -3,9 +3,8 @@ package mobg.g58093.weather_app.data
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import java.util.Date
 
-@Entity(tableName = "weather_entries", indices = [Index(value = ["locationName"], unique = true)])
+@Entity(tableName = "main_weather", indices = [Index(value = ["locationName"], unique = true)])
 data class WeatherEntry (
 
     @PrimaryKey(autoGenerate = true)
@@ -43,6 +42,6 @@ data class WeatherEntry (
     val pressure : Int,
 
     val currentLocation : Boolean
-    )
+)
 
 
