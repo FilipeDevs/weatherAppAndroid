@@ -2,6 +2,7 @@ package mobg.g58093.weather_app.network
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
+import mobg.g58093.weather_app.data.ForecastResponse
 import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Retrofit
 import retrofit2.http.GET
@@ -25,6 +26,15 @@ interface WeatherApiService {
         @Query("units") units : String,
         @Query("appid") apiKey: String
     ): WeatherResponse
+
+    @GET("forecast/daily")
+    suspend fun getWeatherForecast(
+        @Query("lat") latitude: Double,
+        @Query("lon") longitude: Double,
+        @Query("units") units : String,
+        @Query("cnt") cnt: Int,
+        @Query("appid") apiKey: String
+    ): ForecastResponse
 }
 
 object RetroApi {
