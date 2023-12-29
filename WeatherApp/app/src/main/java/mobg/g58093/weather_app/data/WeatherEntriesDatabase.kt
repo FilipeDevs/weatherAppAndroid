@@ -8,7 +8,7 @@ import androidx.room.RoomDatabase
 /**
  * Database class with a singleton Instance object.
  */
-@Database(entities = [WeatherEntry::class], version = 1, exportSchema = false)
+@Database(entities = [WeatherEntry::class, ForecastEntry::class], version = 1, exportSchema = false)
 abstract class WeatherEntriesDatabase : RoomDatabase() {
 
     abstract fun weatherDao(): WeatherDao

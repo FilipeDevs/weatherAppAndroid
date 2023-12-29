@@ -4,7 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ForecastResponse(
-    val timezone : String,
     val list: List<ForecastWeather>,
     val city : City,
 )
@@ -17,15 +16,15 @@ data class City(
 @Serializable
 data class ForecastWeather(
     val dt: Long,
-    val temp: Temperature,
-    val humidity: Int,
-    val weather : WeatherType
+    val main: MainWeather,
+    val weather : List<WeatherType>
 )
 
 @Serializable
-data class Temperature(
-    val min: Double,
-    val max: Double,
+data class MainWeather(
+    val temp_max: Double,
+    val temp_min: Double,
+    val humidity : Int
 )
 @Serializable
 data class WeatherType (

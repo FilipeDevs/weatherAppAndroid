@@ -8,9 +8,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,6 +28,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import mobg.g58093.weather_app.AppViewModelProvider
 import mobg.g58093.weather_app.R
+import mobg.g58093.weather_app.data.ForecastEntry
+import mobg.g58093.weather_app.ui.home.WeatherApiState
 import mobg.g58093.weather_app.ui.theme.Weather_appTheme
 
 @Composable
@@ -32,6 +38,8 @@ fun ForecastScreen(
     forecastViewModel: ForecastViewModel = viewModel(factory = AppViewModelProvider.Factory),
 )
 {
+        val forecastState by forecastViewModel.forecastState.collectAsState()
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -47,6 +55,28 @@ fun ForecastScreen(
                 )
             )
             Spacer(modifier = Modifier.height(20.dp))
+            when(forecastState) {
+                is ForecastApiState.Loading -> {
+                    Text("Loading...")
+                }
+                is ForecastApiState.Success -> {
+                    ForecastList(
+                        forecastList = (forecastState as ForecastApiState.Success).data,
+                        modifier = modifier
+                    )
+                } else -> { // Error
+                    Text((forecastState as ForecastApiState.Error).message)
+                }
+            }
+
+        }
+
+}
+
+@Composable
+private fun ForecastList(forecastList : List<ForecastEntry>, modifier: Modifier) {
+    LazyColumn(modifier = modifier) {
+        items(items = forecastList, key = { it.id }) { item ->
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "Today",
@@ -54,7 +84,7 @@ fun ForecastScreen(
                         fontSize = 20.sp,
                         fontWeight = FontWeight(400),
                         color = Color(0xFFFFFFFF),
-                        )
+                    )
                 )
                 Spacer(modifier = Modifier.width(50.dp))
                 Image(
@@ -68,7 +98,7 @@ fun ForecastScreen(
                         fontSize = 16.sp,
                         fontWeight = FontWeight(400),
                         color = Color(0xFF616161),
-                        )
+                    )
                 )
                 Spacer(modifier = Modifier.width(50.dp))
                 // Weather Icon
@@ -96,10 +126,11 @@ fun ForecastScreen(
                         fontSize = 16.sp,
                         fontWeight = FontWeight(400),
                         color = Color(0xFFFFFFFF),
-                        )
+                    )
                 )
             }
         }
+    }
 
 }
 
