@@ -22,8 +22,8 @@ data class ForecastWeather(
 
 @Serializable
 data class MainWeather(
-    val temp_max: Double,
     val temp_min: Double,
+    val temp_max: Double,
     val humidity : Int
 )
 @Serializable

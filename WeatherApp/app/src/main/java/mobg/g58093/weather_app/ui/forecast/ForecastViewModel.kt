@@ -14,6 +14,8 @@ import mobg.g58093.weather_app.SelectedLocationState
 import mobg.g58093.weather_app.data.ForecastEntry
 import mobg.g58093.weather_app.data.ForecastResponse
 import mobg.g58093.weather_app.data.ForecastWeather
+import mobg.g58093.weather_app.data.MainWeather
+import mobg.g58093.weather_app.data.WeatherEntry
 import mobg.g58093.weather_app.data.WeatherRepository
 import mobg.g58093.weather_app.network.RetroApi
 import mobg.g58093.weather_app.network.isOnline
@@ -40,15 +42,15 @@ class ForecastViewModel(application: Application, private val selectedLocationRe
 
     init {
         viewModelScope.launch {
-            getForecast()
             observeSelectedCityState()
+            getForecast()
         }
     }
 
     private fun convertResponseToFiveDays(forecastResponseList: List<ForecastWeather>)
     : MutableList<ForecastWeather>  {
         val forecastList : MutableList<ForecastWeather> = mutableListOf()
-        for(i in 0..forecastResponseList.size step 8) {
+        for(i in forecastResponseList.indices step 8) {
             forecastList.add(forecastResponseList[i])
         }
 
@@ -62,19 +64,20 @@ class ForecastViewModel(application: Application, private val selectedLocationRe
                 if (isOnline(context)) { // Does the app have internet connection ?
                     // Weather api call to OpenWeather (forecast data)
                     val response = RetroApi.weatherService.getWeatherForecast(selectedLocation.latitude,
-                        selectedLocation.longitude, "metric", 7, "58701429b6088e321356701fde1e7ed0")
+                        selectedLocation.longitude, "metric", "58701429b6088e321356701fde1e7ed0")
                     // Run db operations
 
                     val forecastList = convertResponseToFiveDays(response.list)
 
                     withContext(Dispatchers.IO) {
-                        // Convert response to DTO
-                        if(WeatherRepository.getAllForecastsByLocation(response.city.name).isNotEmpty()) { // forecast entries already exist
+                        val mainWeather : WeatherEntry = WeatherRepository.getWeatherEntry(selectedLocation.locationName)!!
+                        val forecastEntries = WeatherRepository.getAllForecastsByLocation(selectedLocation.locationName)
+                        if(forecastEntries.isNotEmpty()) { // forecast entries already exist
                             _forecastState.value = ForecastApiState.Success(
-                                convertResponseToForecastEntryUpdate(forecastList, response.city.name))
+                                convertResponseToForecastEntryUpdate(forecastList, mainWeather))
                         } else {
                             _forecastState.value = ForecastApiState.Success(
-                                convertResponseToForecastEntryInsert(forecastList, response.city.name))
+                                convertResponseToForecastEntryInsert(forecastList, mainWeather))
                         }
                     }
                 } else { // No internet connection
@@ -82,7 +85,6 @@ class ForecastViewModel(application: Application, private val selectedLocationRe
                     withContext(Dispatchers.IO) {
                         val forecastEntries = WeatherRepository.getAllForecastsByLocation(selectedLocation.locationName)
                         if (forecastEntries.isNotEmpty()) {
-
                             _forecastState.value = ForecastApiState.Success(forecastEntries)
                         } else {
                             _forecastState.value = ForecastApiState.Error("No internet connection and no forecast data in the database.")
@@ -96,8 +98,8 @@ class ForecastViewModel(application: Application, private val selectedLocationRe
         }
     }
 
-    suspend fun convertResponseToForecastEntryUpdate(forecastWeather: List<ForecastWeather>, locationName : String) : List<ForecastEntry> {
-        val existingForecastEntires = WeatherRepository.getAllForecastsByLocation(locationName)
+    suspend fun convertResponseToForecastEntryUpdate(forecastWeather: List<ForecastWeather>, weatherEntry : WeatherEntry) : List<ForecastEntry> {
+        val existingForecastEntires = WeatherRepository.getAllForecastsByLocation(weatherEntry.locationName)
 
         for(index in forecastWeather.indices) {
             val forecast = existingForecastEntires[index]
@@ -114,7 +116,7 @@ class ForecastViewModel(application: Application, private val selectedLocationRe
 
     }
 
-    suspend fun convertResponseToForecastEntryInsert(forecastWeather: List<ForecastWeather>, locationName : String) : List<ForecastEntry> {
+    suspend fun convertResponseToForecastEntryInsert(forecastWeather: List<ForecastWeather>, weatherEntry : WeatherEntry) : List<ForecastEntry> {
         for(forecast in forecastWeather) {
             WeatherRepository.insertForecastEntry(
                 ForecastEntry(
@@ -123,13 +125,14 @@ class ForecastViewModel(application: Application, private val selectedLocationRe
                     tempMin = forecast.main.temp_min.toInt(),
                     icon = forecast.weather[0].icon,
                     humidity = forecast.main.humidity,
-                    locationName = locationName,
-                    date = convertUnixTimestampToHourAndMinutes(forecast.dt)
+                    locationName = weatherEntry.locationName,
+                    date = convertUnixTimestampToHourAndMinutes(forecast.dt),
+                    weatherEntryId = weatherEntry.id
                 )
             )
         }
 
-        return WeatherRepository.getAllForecastsByLocation(locationName)
+        return WeatherRepository.getAllForecastsByLocation(weatherEntry.locationName)
     }
 
     fun convertUnixTimestampToHourAndMinutes(unixTimestamp: Long): String {

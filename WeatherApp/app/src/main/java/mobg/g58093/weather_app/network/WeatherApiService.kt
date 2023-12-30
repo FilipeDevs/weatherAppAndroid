@@ -27,13 +27,12 @@ interface WeatherApiService {
         @Query("appid") apiKey: String
     ): WeatherResponse
 
-    @GET("forecast/daily")
+    @GET("data/2.5/forecast")
     suspend fun getWeatherForecast(
         @Query("lat") latitude: Double,
         @Query("lon") longitude: Double,
         @Query("units") units : String,
-        @Query("cnt") cnt: Int,
-        @Query("appid") apiKey: String
+        @Query("appid") apiKey: String,
     ): ForecastResponse
 }
 

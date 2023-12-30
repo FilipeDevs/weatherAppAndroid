@@ -128,7 +128,13 @@ class WeatherViewModel(application: Application, private val selectedLocationRep
                 } else { // No internet connection
                     // Load data from the local database
                     withContext(Dispatchers.IO) {
-                        val localWeatherEntry = WeatherRepository.getWeatherEntry(selectedLocation.locationName)
+                        val localWeatherEntry : WeatherEntry?
+                        if(isCurrentLocation) {
+                            localWeatherEntry = WeatherRepository.getWeatherEntryCurrentLocation()
+                        } else {
+                            localWeatherEntry = WeatherRepository.getWeatherEntry(selectedLocation.locationName)
+                        }
+
                         if (localWeatherEntry != null) {
                             selectedLocationRepository.editSelectLocation(SelectedLocationState(
                                 localWeatherEntry.locationName, localWeatherEntry.longitude, localWeatherEntry.latitude, isCurrentLocation))

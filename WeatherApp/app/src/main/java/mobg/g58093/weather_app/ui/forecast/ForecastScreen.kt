@@ -93,7 +93,7 @@ private fun ForecastList(forecastList : List<ForecastEntry>, modifier: Modifier)
                 )
                 Spacer(modifier = Modifier.width(3.dp))
                 Text(
-                    text = "42%",
+                    text =  item.humidity.toString() + "%",
                     style = TextStyle(
                         fontSize = 16.sp,
                         fontWeight = FontWeight(400),
@@ -106,12 +106,12 @@ private fun ForecastList(forecastList : List<ForecastEntry>, modifier: Modifier)
                     modifier = Modifier
                         .width(50.dp)
                         .height(50.dp),
-                    model = "https://openweathermap.org/img/wn/11d@2x.png",
+                    model = "https://openweathermap.org/img/wn/${item.icon}@2x.png",
                     placeholder = painterResource(id = R.drawable.deviconweather),
                     contentDescription = "The delasign logo",
                 )
                 Text(
-                    text = "7°",
+                    text = item.tempMin.toString() + "°",
                     style = TextStyle(
                         fontSize = 16.sp,
                         fontWeight = FontWeight(400),
@@ -121,7 +121,7 @@ private fun ForecastList(forecastList : List<ForecastEntry>, modifier: Modifier)
                 )
                 Spacer(modifier = Modifier.width(7.dp))
                 Text(
-                    text = "10°",
+                    text = item.tempMax.toString() + "°",
                     style = TextStyle(
                         fontSize = 16.sp,
                         fontWeight = FontWeight(400),
