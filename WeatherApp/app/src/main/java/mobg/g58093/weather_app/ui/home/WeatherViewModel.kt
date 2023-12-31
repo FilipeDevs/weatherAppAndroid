@@ -2,18 +2,21 @@ package mobg.g58093.weather_app.ui.home
 
 import android.app.Application
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import mobg.g58093.weather_app.SelectedLocationRepository
 import mobg.g58093.weather_app.SelectedLocationState
 import mobg.g58093.weather_app.data.WeatherEntry
 import mobg.g58093.weather_app.data.WeatherRepository
-import mobg.g58093.weather_app.getUserLocation
+import mobg.g58093.weather_app.getCurrentLocation
+import mobg.g58093.weather_app.hasLocationPermission
 import mobg.g58093.weather_app.network.RetroApi
 import mobg.g58093.weather_app.network.WeatherResponse
 import mobg.g58093.weather_app.network.isOnline
@@ -30,61 +33,67 @@ sealed class WeatherApiState {
 
 class WeatherViewModel(application: Application, private val selectedLocationRepository: SelectedLocationRepository) : AndroidViewModel(application) {
 
-    private var selectedLocation = SelectedLocationState()
-
     private val context = application
 
+    // Some states
     private val _weatherState = MutableStateFlow<WeatherApiState>(WeatherApiState.Loading)
     val weatherState: StateFlow<WeatherApiState> = _weatherState
+
+    private val _requestLocationPermission = MutableStateFlow(hasLocationPermission(context))
+    val requestLocationPermission: StateFlow<Boolean> = _requestLocationPermission
+
+    private val _selectedLocation = MutableStateFlow<SelectedLocationState>(SelectedLocationState())
+    val selectedLocation: StateFlow<SelectedLocationState> = _selectedLocation
+
 
     private val TAG = "HomeViewModel"
 
     init {
         viewModelScope.launch {
-            /**
-             * On launch, try to get weather for current location
-             *      1. Check if app has permissions
-             *      2. Check that GPS is activated
-             *      3. If one of the checks fails, ask the user for permissions or activation of GPS
-             *      4. If the user does not grant permissions or activate GPS
-             *          4.1 Load weather data from db from his last stored current location
-             *          4.2 If no data is found in DB for his current location, load weather data
-             *              of the first favorite location
-             *          4.3 If user does not have any locations, show an appropriate message
-             **/
-            if(selectedLocation.currentLocation) {
-                getUserLocation(context) { locationState ->
-                    if (locationState.isLocationPermissionGranted) {
+            if(selectedLocation.value.currentLocation) { // current location selected
+                if(requestLocationPermission.value) { // location permissions check
+                    getCurrentLocation(context) { lat, long -> // fetch new current location
                         getWeatherByCoordinates(
-                            locationState.latitude, locationState.longitude, "metric",
+                            lat, long, "metric",
                             "58701429b6088e321356701fde1e7ed0", true
                         )
-                    } else {
-                        getWeatherData()
                     }
+                } else { // locations permissions not granted
+                    Log.d(TAG, "No permissions granted")
+                    getWeatherData()
                 }
             } else {
                 getWeatherByCoordinates(
-                    selectedLocation.latitude, selectedLocation.longitude, "metric",
+                    selectedLocation.value.latitude, selectedLocation.value.longitude, "metric",
                     "58701429b6088e321356701fde1e7ed0", false
                 )
             }
-
+            observeSelectedCityState()
         }
-        observeSelectedCityState()
+
     }
+
+    fun updatePermissions(perms : Boolean) {
+        _requestLocationPermission.update { perms }
+    }
+
+
 
     private fun getWeatherData() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 // Fetch current location data on DB
                 var currentLocationEntry : WeatherEntry? = WeatherRepository.getWeatherEntryCurrentLocation()
+                Log.d(TAG, "Location : $currentLocationEntry")
                 if (currentLocationEntry != null) { // If db has data of current location
-                    _weatherState.value = WeatherApiState.Success(currentLocationEntry)
+                    getWeatherByCoordinates(currentLocationEntry.latitude, currentLocationEntry.longitude, "metric",
+                        "58701429b6088e321356701fde1e7ed0", true)
                 } else { // No data for current location, so load another location
                     currentLocationEntry = WeatherRepository.getFirstNonCurrentLocationEntry()
                     if(currentLocationEntry != null) {
-                        getWeatherByCoordinates(currentLocationEntry.latitude, currentLocationEntry.longitude, "metric", "58701429b6088e321356701fde1e7ed0", false)
+                        getWeatherByCoordinates(currentLocationEntry.latitude,
+                            currentLocationEntry.longitude, "metric",
+                            "58701429b6088e321356701fde1e7ed0", false)
                     } else {
                         _weatherState.value = WeatherApiState.Error("You've got no locations to show the weather")
                     }
@@ -97,7 +106,7 @@ class WeatherViewModel(application: Application, private val selectedLocationRep
         viewModelScope.launch {
             selectedLocationRepository.selectedLocationState.collect { newState ->
                 Log.d(TAG, "New selected location: $newState")
-                selectedLocation =  newState
+                _selectedLocation.update { newState }
             }
         }
     }
@@ -127,12 +136,13 @@ class WeatherViewModel(application: Application, private val selectedLocationRep
                     }
                 } else { // No internet connection
                     // Load data from the local database
+                    Toast.makeText(context, "No internet connection", Toast.LENGTH_LONG).show()
                     withContext(Dispatchers.IO) {
                         val localWeatherEntry : WeatherEntry?
                         if(isCurrentLocation) {
                             localWeatherEntry = WeatherRepository.getWeatherEntryCurrentLocation()
                         } else {
-                            localWeatherEntry = WeatherRepository.getWeatherEntry(selectedLocation.locationName)
+                            localWeatherEntry = WeatherRepository.getWeatherEntry(selectedLocation.value.locationName)
                         }
 
                         if (localWeatherEntry != null) {
@@ -151,19 +161,19 @@ class WeatherViewModel(application: Application, private val selectedLocationRep
         }
     }
 
-    fun convertCurrentDateToFormattedDate(): String {
+    private fun convertCurrentDateToFormattedDate(): String {
         val date = Date()
         val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
         return sdf.format(date)
     }
 
-    fun convertUnixTimestampToHourAndMinutes(unixTimestamp: Long): String {
+    private fun convertUnixTimestampToHourAndMinutes(unixTimestamp: Long): String {
         val date = Date(unixTimestamp * 1000L)
         val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
         return sdf.format(date)
     }
 
-    fun convertWeatherResponseToWeatherEntry(weatherResponse: WeatherResponse, id : Int, isCurrentLocation: Boolean) : WeatherEntry {
+    private fun convertWeatherResponseToWeatherEntry(weatherResponse: WeatherResponse, id : Int, isCurrentLocation: Boolean) : WeatherEntry {
         return WeatherEntry(
             id = id,
             locationName = weatherResponse.name,
@@ -188,8 +198,8 @@ class WeatherViewModel(application: Application, private val selectedLocationRep
     fun refreshData() {
         viewModelScope.launch {
             getWeatherByCoordinates(
-                selectedLocation.latitude,  selectedLocation.longitude, "metric",
-                    "58701429b6088e321356701fde1e7ed0", selectedLocation.currentLocation)
+                selectedLocation.value.latitude,  selectedLocation.value.longitude, "metric",
+                    "58701429b6088e321356701fde1e7ed0", selectedLocation.value.currentLocation)
         }
     }
 

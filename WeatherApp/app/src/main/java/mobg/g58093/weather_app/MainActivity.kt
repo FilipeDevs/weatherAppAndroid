@@ -17,12 +17,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.app.ActivityCompat
 import mobg.g58093.weather_app.data.WeatherRepository
 import mobg.g58093.weather_app.ui.theme.Weather_appTheme
 
 class MainActivity : ComponentActivity(){
     private val TAG = "MainActivity"
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WeatherRepository.initDatabase(applicationContext)
@@ -38,6 +38,7 @@ class MainActivity : ComponentActivity(){
             }
         }
     }
+
 }
 
 @Preview(showBackground = true)
