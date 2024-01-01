@@ -10,8 +10,6 @@ object WeatherRepository {
     private var database : WeatherEntriesDatabase? = null
 
     fun initDatabase(context: Context){
-        Log.d("WeatherRepository", "initDatabase")
-        Log.d("WeatherRepository", "database ${database}")
         if (database == null) {
             database = WeatherEntriesDatabase.getInstance(context)
         }
@@ -41,6 +39,13 @@ object WeatherRepository {
     suspend fun getWeatherEntry(locationName: String, country : String): WeatherEntry? {
         database?.let { theDatabase ->
             return theDatabase.weatherDao().getWeatherEntry(locationName, country)
+        }
+        return null
+    }
+
+    suspend fun getWeatherEntry(id : Int): WeatherEntry? {
+        database?.let { theDatabase ->
+            return theDatabase.weatherDao().getWeatherEntry(id)
         }
         return null
     }

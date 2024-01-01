@@ -63,7 +63,11 @@ class WeatherViewModel(application: Application, private val selectedLocationRep
             }
             observeSelectedCityState()
         }
+    }
 
+    fun fetchWeather() {
+        getWeatherByCoordinates(44.34,
+            10.99, false)
     }
 
     fun fetchWeatherCurrentLocation() {

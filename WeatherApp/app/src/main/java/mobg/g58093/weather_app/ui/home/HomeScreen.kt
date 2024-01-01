@@ -96,16 +96,17 @@ fun HomeScreen(
                     Text("Loading...")
                 }
                 is WeatherApiState.Success -> {
+                    Spacer(modifier = Modifier.height(20.dp))
                     Text(
                         text = (weatherState as WeatherApiState.Success).data.locationName
                                 + " - " + (weatherState as WeatherApiState.Success).data.country,
                         style = TextStyle(
-                            fontSize = 25.sp,
+                            fontSize = 20.sp,
                             fontWeight = FontWeight(400),
                             color  = Color(0xFF616161)
                         )
                     )
-                    Spacer(modifier = Modifier.height(15.dp))
+                    Spacer(modifier = Modifier.height(5.dp))
                     // Date
                     Text(
                         text = convertCurrentDateToFormattedDate(),
@@ -115,12 +116,11 @@ fun HomeScreen(
                             color  = Color(0xFF616161)
                         )
                     )
-                    Spacer(modifier = Modifier.height(20.dp))
                     // Current temperature
                     Text(
                         text = (weatherState as WeatherApiState.Success).data.mainTemp.toString() + "°C",
                         style = TextStyle(
-                            fontSize = 96.sp,
+                            fontSize = 80.sp,
                             fontWeight = FontWeight(400),
                             color = Color(0xFFFFFFFF),
                         )
@@ -151,7 +151,7 @@ fun HomeScreen(
                             }
 
                         }
-                        Spacer(modifier = Modifier.width(16.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Image(
@@ -178,8 +178,8 @@ fun HomeScreen(
                     // Weather Icon
                     AsyncImage(
                         modifier = Modifier
-                            .width(210.dp)
-                            .height(210.dp),
+                            .width(190.dp)
+                            .height(180.dp),
                         model = "https://openweathermap.org/img/wn/${(weatherState as WeatherApiState.Success).data.weatherIcon}@2x.png",
                         placeholder = painterResource(id = R.drawable.deviconweather),
                         contentDescription = "The delasign logo",
@@ -243,7 +243,7 @@ fun HomeScreen(
 
                         }
                     }
-                    Spacer(modifier = Modifier.height(25.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
                     Button(
                         onClick = navigateToDetails,
                         modifier = Modifier.padding(8.dp)
@@ -251,7 +251,7 @@ fun HomeScreen(
                         Text(
                             text = "Details",
                             style = TextStyle(
-                                fontSize = 24.sp,
+                                fontSize = 18.sp,
                                 fontWeight = FontWeight(400),
                                 color = Color(0xFF616161),
                             )
@@ -260,7 +260,7 @@ fun HomeScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
                     Row(
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
                             text = "Last updated : " + (weatherState as WeatherApiState.Success).data.date,

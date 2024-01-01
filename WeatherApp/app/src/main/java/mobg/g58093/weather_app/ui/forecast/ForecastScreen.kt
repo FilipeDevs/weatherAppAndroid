@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -29,7 +28,6 @@ import coil.compose.AsyncImage
 import mobg.g58093.weather_app.AppViewModelProvider
 import mobg.g58093.weather_app.R
 import mobg.g58093.weather_app.data.ForecastEntry
-import mobg.g58093.weather_app.ui.home.WeatherApiState
 import mobg.g58093.weather_app.ui.theme.Weather_appTheme
 
 @Composable

@@ -23,7 +23,8 @@ object AppViewModelProvider {
             ForecastViewModel(appContainer.application, appContainer.userRepository)
         }
         initializer {
-            LocationsViewModel()
+            val appContainer = this.weatherApplication().container
+            LocationsViewModel(appContainer.userRepository)
         }
 
     }

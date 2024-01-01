@@ -25,6 +25,10 @@ interface WeatherDao {
     @Query("SELECT * from main_weather WHERE locationName = :name AND country = :country")
     fun getWeatherEntry(name : String, country : String) : WeatherEntry
 
+    @Query("SELECT * from main_weather WHERE id = :id")
+    fun getWeatherEntry(id : Int) : WeatherEntry
+
+
     @Query("SELECT * from main_weather WHERE currentLocation = 1")
     fun getWeatherEntryCurrentLocation() : WeatherEntry
 
