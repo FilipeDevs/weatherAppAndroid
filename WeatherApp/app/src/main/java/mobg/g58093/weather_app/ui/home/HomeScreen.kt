@@ -23,7 +23,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -40,55 +39,12 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
-import com.google.android.gms.location.LocationServices
 import mobg.g58093.weather_app.R
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-
-@Composable
-fun ShowLocationPermissionPopup(context: Context) {
-    // State to track whether the dialog is shown
-    var isDialogVisible by remember { mutableStateOf(true) }
-
-    if (isDialogVisible) {
-        AlertDialog(
-            onDismissRequest = {
-                isDialogVisible = false
-            },
-            title = { Text("Location Permission Required") },
-            text = {
-                Column {
-                    Text("The app requires access to your location for a better experience.")
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                        val uri: Uri = Uri.fromParts("package", context.packageName, null)
-                        intent.data = uri
-                        context.startActivity(intent)
-                        isDialogVisible = false
-                    }
-                ) {
-                    Text("Go to Settings")
-                }
-            },
-            dismissButton = {
-                Button(onClick = {
-                    isDialogVisible = false
-                }) {
-                    Text("Dismiss")
-                }
-            }
-        )
-    }
-}
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
@@ -110,6 +66,8 @@ fun HomeScreen(
                 if (isGranted) {
                     weatherViewModel.updatePermissions(true)
                     permission = true
+                    // permissions granted so fetch current location
+                    weatherViewModel.fetchWeatherCurrentLocation()
                 } else {
                     weatherViewModel.updatePermissions(false)
                     permission = false
@@ -138,6 +96,16 @@ fun HomeScreen(
                     Text("Loading...")
                 }
                 is WeatherApiState.Success -> {
+                    Text(
+                        text = (weatherState as WeatherApiState.Success).data.locationName
+                                + " - " + (weatherState as WeatherApiState.Success).data.country,
+                        style = TextStyle(
+                            fontSize = 25.sp,
+                            fontWeight = FontWeight(400),
+                            color  = Color(0xFF616161)
+                        )
+                    )
+                    Spacer(modifier = Modifier.height(15.dp))
                     // Date
                     Text(
                         text = convertCurrentDateToFormattedDate(),
@@ -210,8 +178,8 @@ fun HomeScreen(
                     // Weather Icon
                     AsyncImage(
                         modifier = Modifier
-                            .width(230.dp)
-                            .height(230.dp),
+                            .width(210.dp)
+                            .height(210.dp),
                         model = "https://openweathermap.org/img/wn/${(weatherState as WeatherApiState.Success).data.weatherIcon}@2x.png",
                         placeholder = painterResource(id = R.drawable.deviconweather),
                         contentDescription = "The delasign logo",
@@ -275,7 +243,7 @@ fun HomeScreen(
 
                         }
                     }
-                    Spacer(modifier = Modifier.height(40.dp))
+                    Spacer(modifier = Modifier.height(25.dp))
                     Button(
                         onClick = navigateToDetails,
                         modifier = Modifier.padding(8.dp)
@@ -291,25 +259,30 @@ fun HomeScreen(
                     }
 
                     Spacer(modifier = Modifier.height(20.dp))
-                    Text(
-                        text = "Last updated : " + (weatherState as WeatherApiState.Success).data.date,
-                        style = TextStyle(
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight(400),
-                            color = Color(0xFF616161),
-                        )
-                    )
-                    Spacer(modifier = Modifier.height(5.dp))
-                    Button(
-                        onClick = { weatherViewModel.refreshData() },
-                        modifier = Modifier.padding(8.dp)
-
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Refresh",
-                            color = Color.White
+                            text = "Last updated : " + (weatherState as WeatherApiState.Success).data.date,
+                            style = TextStyle(
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight(400),
+                                color = Color(0xFF616161),
+                            )
                         )
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Button(
+                            onClick = { weatherViewModel.refreshData() },
+                            modifier = Modifier.padding(8.dp)
+
+                        ) {
+                            Text(
+                                text = "Refresh",
+                                color = Color.White
+                            )
+                        }
                     }
+
                 }
                 is WeatherApiState.Error -> {
                     // Show error state
@@ -321,6 +294,47 @@ fun HomeScreen(
             }
 
         }
+}
+
+@Composable
+fun ShowLocationPermissionPopup(context: Context) {
+    // State to track whether the dialog is shown
+    var isDialogVisible by remember { mutableStateOf(true) }
+
+    if (isDialogVisible) {
+        AlertDialog(
+            onDismissRequest = {
+                isDialogVisible = false
+            },
+            title = { Text("Location Permission Required") },
+            text = {
+                Column {
+                    Text("The app requires access to your location for a better experience.")
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                        val uri: Uri = Uri.fromParts("package", context.packageName, null)
+                        intent.data = uri
+                        context.startActivity(intent)
+                        isDialogVisible = false
+                    }
+                ) {
+                    Text("Go to Settings")
+                }
+            },
+            dismissButton = {
+                Button(onClick = {
+                    isDialogVisible = false
+                }) {
+                    Text("Dismiss")
+                }
+            }
+        )
+    }
 }
 
 

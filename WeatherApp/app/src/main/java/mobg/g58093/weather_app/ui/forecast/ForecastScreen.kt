@@ -79,14 +79,14 @@ private fun ForecastList(forecastList : List<ForecastEntry>, modifier: Modifier)
         items(items = forecastList, key = { it.id }) { item ->
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "Today",
+                    text = item.date,
                     style = TextStyle(
                         fontSize = 20.sp,
                         fontWeight = FontWeight(400),
                         color = Color(0xFFFFFFFF),
                     )
                 )
-                Spacer(modifier = Modifier.width(50.dp))
+                Spacer(modifier = Modifier.width(40.dp))
                 Image(
                     painter = painterResource(id = R.drawable.water),
                     contentDescription = "water icon"
@@ -100,7 +100,7 @@ private fun ForecastList(forecastList : List<ForecastEntry>, modifier: Modifier)
                         color = Color(0xFF616161),
                     )
                 )
-                Spacer(modifier = Modifier.width(50.dp))
+                Spacer(modifier = Modifier.width(40.dp))
                 // Weather Icon
                 AsyncImage(
                     modifier = Modifier

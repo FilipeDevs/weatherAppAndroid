@@ -1,13 +1,15 @@
 package mobg.g58093.weather_app
 
 
+import android.util.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 data class SelectedLocationState(
-    val locationName : String = "currentLocation",
+    val locationName : String = "",
+    val countryCode : String = "",
     val longitude : Double = 0.0,
     val latitude : Double = 0.0,
     val currentLocation : Boolean = true,
@@ -25,7 +27,9 @@ class SelectedLocationRepository {
             latitude = selectedLocationState.latitude,
             longitude = selectedLocationState.longitude,
             locationName = selectedLocationState.locationName,
-            currentLocation = selectedLocationState.currentLocation
+            currentLocation = selectedLocationState.currentLocation,
+            countryCode = selectedLocationState.countryCode
         )}
+        Log.d(TAG, "$selectedLocationState")
     }
 }

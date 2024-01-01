@@ -22,8 +22,8 @@ interface WeatherDao {
     @Query("SELECT * from forecast_weather WHERE locationName = :name")
     suspend fun getAllForecastEntriesByLocation(name : String): List<ForecastEntry>
 
-    @Query("SELECT * from main_weather WHERE locationName = :name")
-    fun getWeatherEntry(name : String) : WeatherEntry
+    @Query("SELECT * from main_weather WHERE locationName = :name AND country = :country")
+    fun getWeatherEntry(name : String, country : String) : WeatherEntry
 
     @Query("SELECT * from main_weather WHERE currentLocation = 1")
     fun getWeatherEntryCurrentLocation() : WeatherEntry

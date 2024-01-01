@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import mobg.g58093.weather_app.ui.forecast.ForecastViewModel
 import mobg.g58093.weather_app.ui.home.WeatherViewModel
+import mobg.g58093.weather_app.ui.locations.LocationsViewModel
 
 /**
  * Provides Factory to create instance of ViewModel for the entire Inventory app
@@ -20,6 +21,9 @@ object AppViewModelProvider {
         initializer {
             val appContainer = this.weatherApplication().container
             ForecastViewModel(appContainer.application, appContainer.userRepository)
+        }
+        initializer {
+            LocationsViewModel()
         }
 
     }

@@ -70,7 +70,8 @@ class ForecastViewModel(application: Application, private val selectedLocationRe
                     val forecastList = convertResponseToFiveDays(response.list)
 
                     withContext(Dispatchers.IO) {
-                        val mainWeather : WeatherEntry = WeatherRepository.getWeatherEntry(selectedLocation.locationName)!!
+                        val mainWeather : WeatherEntry = WeatherRepository.getWeatherEntry(
+                            selectedLocation.locationName, selectedLocation.countryCode)!!
                         val forecastEntries = WeatherRepository.getAllForecastsByLocation(selectedLocation.locationName)
                         if(forecastEntries.isNotEmpty()) { // forecast entries already exist
                             _forecastState.value = ForecastApiState.Success(
@@ -108,7 +109,7 @@ class ForecastViewModel(application: Application, private val selectedLocationRe
                 tempMin = forecastWeather[index].main.temp_min.toInt(),
                 icon = forecastWeather[index].weather[0].icon,
                 humidity = forecastWeather[index].main.humidity,
-                date = convertUnixTimestampToHourAndMinutes(forecastWeather[index].dt)
+                date = convertUnixTimestampToDayAndMonth(forecastWeather[index].dt)
             ))
         }
 
@@ -126,7 +127,7 @@ class ForecastViewModel(application: Application, private val selectedLocationRe
                     icon = forecast.weather[0].icon,
                     humidity = forecast.main.humidity,
                     locationName = weatherEntry.locationName,
-                    date = convertUnixTimestampToHourAndMinutes(forecast.dt),
+                    date = convertUnixTimestampToDayAndMonth(forecast.dt),
                     weatherEntryId = weatherEntry.id
                 )
             )
@@ -135,9 +136,9 @@ class ForecastViewModel(application: Application, private val selectedLocationRe
         return WeatherRepository.getAllForecastsByLocation(weatherEntry.locationName)
     }
 
-    fun convertUnixTimestampToHourAndMinutes(unixTimestamp: Long): String {
+    fun convertUnixTimestampToDayAndMonth(unixTimestamp: Long): String {
         val date = Date(unixTimestamp * 1000L)
-        val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
+        val sdf = SimpleDateFormat("dd/MM", Locale.getDefault())
         return sdf.format(date)
     }
 

@@ -27,6 +27,7 @@ import mobg.g58093.weather_app.ui.details.DetailsScreen
 import mobg.g58093.weather_app.ui.forecast.ForecastScreen
 import mobg.g58093.weather_app.ui.home.HomeScreen
 import mobg.g58093.weather_app.ui.home.WeatherViewModel
+import mobg.g58093.weather_app.ui.locations.LocationsScreen
 
 enum class WeatherAppScreen(@StringRes val title: Int) {
     Home(title = R.string.home),
@@ -41,7 +42,7 @@ enum class WeatherAppScreen(@StringRes val title: Int) {
 fun TopAppBar(
     @StringRes currentScreenTitle: Int,
     canNavigateBack: Boolean,
-    //navigateToLocations : () -> Unit,
+    navigateToLocations : () -> Unit,
     modifier: Modifier = Modifier,
     navigateUp: () -> Unit,
 ) {
@@ -59,7 +60,7 @@ fun TopAppBar(
             }
         },
         actions = {
-            IconButton(onClick = { /** navigateToLocations */ }) {
+            IconButton(onClick = { navigateToLocations() }) {
                 Icon(imageVector = Icons.Default.Menu, contentDescription = null)
             }
         }
@@ -82,7 +83,7 @@ fun WeatherApp() {
                 currentScreenTitle = currentScreen.title,
                 canNavigateBack = navController.previousBackStackEntry != null,
                 navigateUp = { navController.navigateUp() },
-                //navigateToLocations = {navController.navigate(WeatherAppScreen.Locations.name)}
+                navigateToLocations = {navController.navigate(WeatherAppScreen.Locations.name)}
             )
         }
     ) {
@@ -106,6 +107,12 @@ fun WeatherApp() {
             // Forecast
             composable(route = WeatherAppScreen.Forecast.name) {
                 ForecastScreen( modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding))
+            }
+            // Locations/Favorites
+            composable(route = WeatherAppScreen.Locations.name) {
+                LocationsScreen(modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding))
             }

@@ -40,7 +40,8 @@ data class WeatherInfo(
 @Serializable
 data class SysInfo(
     val sunrise: Long,
-    val sunset: Long
+    val sunset: Long,
+    val country : String,
 )
 
 @Serializable

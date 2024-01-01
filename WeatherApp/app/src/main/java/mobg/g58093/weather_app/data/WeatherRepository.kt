@@ -38,9 +38,9 @@ object WeatherRepository {
         }
         return listOf()
     }
-    suspend fun getWeatherEntry(locationName: String): WeatherEntry? {
+    suspend fun getWeatherEntry(locationName: String, country : String): WeatherEntry? {
         database?.let { theDatabase ->
-            return theDatabase.weatherDao().getWeatherEntry(locationName)
+            return theDatabase.weatherDao().getWeatherEntry(locationName, country)
         }
         return null
     }
