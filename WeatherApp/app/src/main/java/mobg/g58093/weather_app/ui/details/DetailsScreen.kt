@@ -38,7 +38,7 @@ fun DetailsScreen(
             verticalArrangement = Arrangement.Center, // Center vertically
             horizontalAlignment = Alignment.CenterHorizontally // Center horizontally
         ) {
-            when(weatherState) {
+            when(val currentState = weatherState) {
                 is WeatherApiState.Loading -> {
                     Text("Loading...")
                 }
@@ -62,7 +62,7 @@ fun DetailsScreen(
                             )
                     )
                     Text(
-                        text =  (weatherState as WeatherApiState.Success).data.wind.toString() + " km/h",
+                        text =  currentState.data.wind.toString() + " km/h",
                         style = TextStyle(
                             fontSize = 20.sp,
                             fontWeight = FontWeight(400),
@@ -81,7 +81,7 @@ fun DetailsScreen(
                             )
                     )
                     Text(
-                        text =  (weatherState as WeatherApiState.Success).data.humidity.toString() + "%",
+                        text =  currentState.data.humidity.toString() + "%",
                         style = TextStyle(
                             fontSize = 20.sp,
                             fontWeight = FontWeight(400),
@@ -100,7 +100,7 @@ fun DetailsScreen(
                             )
                     )
                     Text(
-                        text =  (weatherState as WeatherApiState.Success).data.visibility.toString(),
+                        text =  currentState.data.visibility.toString(),
                         style = TextStyle(
                             fontSize = 20.sp,
                             fontWeight = FontWeight(400),
@@ -118,7 +118,7 @@ fun DetailsScreen(
                             )
                     )
                     Text(
-                        text =  (weatherState as WeatherApiState.Success).data.pressure.toString() + " hPa",
+                        text =  currentState.data.pressure.toString() + " hPa",
                         style = TextStyle(
                             fontSize = 20.sp,
                             fontWeight = FontWeight(400),
@@ -138,9 +138,8 @@ fun DetailsScreen(
                 else -> {}
             }
 
-                }
-
         }
+}
 
 @Preview(showBackground = true)
 @Composable

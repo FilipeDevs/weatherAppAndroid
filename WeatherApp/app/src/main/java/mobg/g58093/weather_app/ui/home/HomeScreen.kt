@@ -91,15 +91,15 @@ fun HomeScreen(
             verticalArrangement = Arrangement.Center, // Center vertically
             horizontalAlignment = Alignment.CenterHorizontally // Center horizontally
         ) {
-            when(weatherState) {
+            when(val currentState = weatherState) {
                 is WeatherApiState.Loading -> {
                     Text("Loading...")
                 }
                 is WeatherApiState.Success -> {
                     Spacer(modifier = Modifier.height(20.dp))
                     Text(
-                        text = (weatherState as WeatherApiState.Success).data.locationName
-                                + " - " + (weatherState as WeatherApiState.Success).data.country,
+                        text = currentState.data.locationName
+                                + " - " + currentState.data.country,
                         style = TextStyle(
                             fontSize = 20.sp,
                             fontWeight = FontWeight(400),
@@ -118,7 +118,7 @@ fun HomeScreen(
                     )
                     // Current temperature
                     Text(
-                        text = (weatherState as WeatherApiState.Success).data.mainTemp.toString() + "°C",
+                        text = currentState.data.mainTemp.toString() + "°C",
                         style = TextStyle(
                             fontSize = 80.sp,
                             fontWeight = FontWeight(400),
@@ -141,7 +141,7 @@ fun HomeScreen(
                                 )
                                 Spacer(modifier = Modifier.width(2.dp))
                                 Text(
-                                    text = (weatherState as WeatherApiState.Success).data.lowTemp.toString() + "°C",
+                                    text = currentState.data.lowTemp.toString() + "°C",
                                     style = TextStyle(
                                         fontSize = 18.sp,
                                         fontWeight = FontWeight(400),
@@ -164,7 +164,7 @@ fun HomeScreen(
                                 )
                                 Spacer(modifier = Modifier.width(2.dp))
                                 Text(
-                                    text = (weatherState as WeatherApiState.Success).data.highTemp.toString() + "°C",
+                                    text = currentState.data.highTemp.toString() + "°C",
                                     style = TextStyle(
                                         fontSize = 18.sp,
                                         fontWeight = FontWeight(400),
@@ -186,7 +186,7 @@ fun HomeScreen(
                     )
 
                     Text(
-                        text = (weatherState as WeatherApiState.Success).data.weatherType,
+                        text = currentState.data.weatherType,
                         style = TextStyle(
                             fontSize = 18.sp,
                             fontWeight = FontWeight(400),
@@ -209,7 +209,7 @@ fun HomeScreen(
                                 )
                                 Spacer(modifier = Modifier.width(2.dp))
                                 Text(
-                                    text = (weatherState as WeatherApiState.Success).data.sunriseHour,
+                                    text = currentState.data.sunriseHour,
                                     style = TextStyle(
                                         fontSize = 18.sp,
                                         fontWeight = FontWeight(400),
@@ -232,7 +232,7 @@ fun HomeScreen(
                                 )
                                 Spacer(modifier = Modifier.width(2.dp))
                                 Text(
-                                    text = (weatherState as WeatherApiState.Success).data.sunsetHour,
+                                    text = currentState.data.sunsetHour,
                                     style = TextStyle(
                                         fontSize = 18.sp,
                                         fontWeight = FontWeight(400),
@@ -263,7 +263,7 @@ fun HomeScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            text = "Last updated : " + (weatherState as WeatherApiState.Success).data.date,
+                            text = "Last updated : " + currentState.data.date,
                             style = TextStyle(
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight(400),
@@ -284,13 +284,11 @@ fun HomeScreen(
                     }
 
                 }
-                is WeatherApiState.Error -> {
+                else -> {
                     // Show error state
                     val errorMessage = (weatherState as WeatherApiState.Error).message
                     Text("Error: $errorMessage")
                 }
-
-                else -> {}
             }
 
         }

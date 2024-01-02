@@ -53,13 +53,13 @@ fun ForecastScreen(
                 )
             )
             Spacer(modifier = Modifier.height(20.dp))
-            when(forecastState) {
+            when(val currentState = forecastState) {
                 is ForecastApiState.Loading -> {
                     Text("Loading...")
                 }
                 is ForecastApiState.Success -> {
                     ForecastList(
-                        forecastList = (forecastState as ForecastApiState.Success).data,
+                        forecastList = currentState.data,
                         modifier = modifier
                     )
                 } else -> { // Error
