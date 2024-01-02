@@ -7,13 +7,11 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import mobg.g58093.weather_app.ui.forecast.ForecastViewModel
 import mobg.g58093.weather_app.ui.home.WeatherViewModel
 import mobg.g58093.weather_app.ui.locations.LocationsViewModel
+import mobg.g58093.weather_app.ui.search.SearchViewModel
 
-/**
- * Provides Factory to create instance of ViewModel for the entire Inventory app
- */
+
 object AppViewModelProvider {
     val Factory = viewModelFactory {
-        // Initializer for ItemEditViewModel
         initializer {
             val appContainer = this.weatherApplication().container
             WeatherViewModel(appContainer.application, appContainer.userRepository)
@@ -25,6 +23,10 @@ object AppViewModelProvider {
         initializer {
             val appContainer = this.weatherApplication().container
             LocationsViewModel(appContainer.userRepository)
+        }
+        initializer {
+            val appContainer = this.weatherApplication().container
+            SearchViewModel(appContainer.application)
         }
 
     }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -28,6 +29,7 @@ import mobg.g58093.weather_app.ui.forecast.ForecastScreen
 import mobg.g58093.weather_app.ui.home.HomeScreen
 import mobg.g58093.weather_app.ui.home.WeatherViewModel
 import mobg.g58093.weather_app.ui.locations.LocationsScreen
+import mobg.g58093.weather_app.ui.search.SearchScreen
 
 enum class WeatherAppScreen(@StringRes val title: Int) {
     Home(title = R.string.home),
@@ -62,7 +64,7 @@ fun TopAppBar(
         actions = {
             if(currentScreenTitle != WeatherAppScreen.Locations.title) {
                 IconButton(onClick = { navigateToLocations() }) {
-                    Icon(imageVector = Icons.Default.Menu, contentDescription = null)
+                    Icon(imageVector = Icons.Default.List, contentDescription = null)
                 }
             }
 
@@ -116,6 +118,13 @@ fun WeatherApp() {
             // Locations/Favorites
             composable(route = WeatherAppScreen.Locations.name) {
                 LocationsScreen(modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                    navigateToSearch = {navController.navigate(WeatherAppScreen.Search.name)})
+            }
+            // Search
+            composable(route = WeatherAppScreen.Search.name) {
+                SearchScreen(modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding))
             }

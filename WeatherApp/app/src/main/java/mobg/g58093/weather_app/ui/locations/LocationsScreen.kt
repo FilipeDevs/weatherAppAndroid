@@ -1,6 +1,5 @@
 package mobg.g58093.weather_app.ui.locations
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,7 +21,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -45,7 +43,7 @@ import mobg.g58093.weather_app.data.WeatherEntry
 fun LocationsScreen(
     modifier: Modifier = Modifier,
     locationsViewModel: LocationsViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    //navigateToSearch : () -> Unit,
+    navigateToSearch : () -> Unit,
 ) {
     val locationsState by locationsViewModel.locationsState.collectAsState()
     val selectedLocation by locationsViewModel.selectedLocation.collectAsState()
@@ -69,7 +67,7 @@ fun LocationsScreen(
         // Floating "+" button
         FloatingActionButton(
             onClick = {
-                // TODO : Link to search screen here
+                navigateToSearch()
             },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
