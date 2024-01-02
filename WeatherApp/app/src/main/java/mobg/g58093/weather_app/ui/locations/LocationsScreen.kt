@@ -1,16 +1,24 @@
 package mobg.g58093.weather_app.ui.locations
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,14 +52,31 @@ fun LocationsScreen(
 
     LaunchedEffect(locationsViewModel.getAllUserLocations()) {}
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp),
-        horizontalAlignment = Alignment.Start // Center horizontally
+            .padding(20.dp)
     ) {
-        LocationList(locationsList = locationsState.locationsList, modifier = modifier,
-            selectedLocation, locationsViewModel)
+        // Column for the main content (including the LocationList)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            LocationList(locationsList = locationsState.locationsList, modifier = modifier,
+                selectedLocation, locationsViewModel)
+        }
+
+        // Floating "+" button
+        FloatingActionButton(
+            onClick = {
+                // TODO : Link to search screen here
+            },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            Icon(Icons.Default.Add, contentDescription = "Add", tint = Color.White)
+        }
     }
 }
 
@@ -89,7 +114,7 @@ fun LocationList(locationsList : List<WeatherEntry>, modifier: Modifier,
                         )
                     )
                 }
-                Spacer(modifier = Modifier.width(50.dp))
+                Spacer(modifier = Modifier.width(5.dp))
                 // Weather Icon
                 AsyncImage(
                     modifier = Modifier
@@ -103,6 +128,18 @@ fun LocationList(locationsList : List<WeatherEntry>, modifier: Modifier,
                     checked = selectedLocation.locationName == item.locationName
                         && selectedLocation.countryCode == item.country,
                     onCheckedChange = { locationsViewModel.changeSelectedLocation(item.id) })
+                IconButton(
+                    onClick = { locationsViewModel.deleteWeatherEntry(item.id) },
+                    modifier = Modifier
+                        .size(35.dp)
+                        .padding(4.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        tint = Color.Red
+                    )
+                }
             }
         }
     }

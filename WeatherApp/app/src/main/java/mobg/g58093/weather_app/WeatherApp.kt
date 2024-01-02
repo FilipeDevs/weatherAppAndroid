@@ -60,9 +60,12 @@ fun TopAppBar(
             }
         },
         actions = {
-            IconButton(onClick = { navigateToLocations() }) {
-                Icon(imageVector = Icons.Default.Menu, contentDescription = null)
+            if(currentScreenTitle != WeatherAppScreen.Locations.title) {
+                IconButton(onClick = { navigateToLocations() }) {
+                    Icon(imageVector = Icons.Default.Menu, contentDescription = null)
+                }
             }
+
         }
 
     )

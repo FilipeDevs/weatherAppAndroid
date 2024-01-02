@@ -32,4 +32,8 @@ class SelectedLocationRepository {
         )}
         Log.d(TAG, "$selectedLocationState")
     }
+
+    fun resetSelectedLocation() {
+        _selectedLocationState.update { SelectedLocationState() }
+    }
 }

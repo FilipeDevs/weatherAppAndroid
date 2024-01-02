@@ -62,6 +62,7 @@ class WeatherViewModel(application: Application, private val selectedLocationRep
                 )
             }
             observeSelectedCityState()
+            fetchWeather()
         }
     }
 
@@ -213,9 +214,14 @@ class WeatherViewModel(application: Application, private val selectedLocationRep
 
     fun refreshData() {
         viewModelScope.launch {
-            getWeatherByCoordinates(
-                selectedLocation.value.latitude,  selectedLocation.value.longitude,
+            if(selectedLocation.value.currentLocation) {
+                fetchWeatherCurrentLocation()
+            } else {
+                getWeatherByCoordinates(
+                    selectedLocation.value.latitude,  selectedLocation.value.longitude,
                     selectedLocation.value.currentLocation)
+            }
+
         }
     }
 

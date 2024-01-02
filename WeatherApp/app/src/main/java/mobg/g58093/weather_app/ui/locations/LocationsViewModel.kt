@@ -67,6 +67,23 @@ class LocationsViewModel(private val selectedLocationRepository: SelectedLocatio
                 }
             }
         }
+    }
 
+    fun deleteWeatherEntry(id : Int) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val weatherEntry : WeatherEntry? = WeatherRepository.getWeatherEntry(id)
+
+                // If selected location is the one being deleted, then reset the selected location state
+                if (weatherEntry != null) {
+                    if(selectedLocation.value.locationName == weatherEntry.locationName &&
+                        selectedLocation.value.countryCode == weatherEntry.country) {
+                            selectedLocationRepository.resetSelectedLocation()
+                    }
+                    WeatherRepository.deleteWeatherEntry(weatherEntry)
+                }
+                getAllUserLocations()
+            }
+        }
     }
 }
