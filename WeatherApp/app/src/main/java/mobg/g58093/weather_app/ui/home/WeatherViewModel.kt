@@ -131,8 +131,9 @@ class WeatherViewModel(application: Application, private val selectedLocationRep
                     val response = RetroApi.weatherService.getWeatherByCoordinates(latitude, longitude, units, apiKey)
                     // Run db operations
                     withContext(Dispatchers.IO) {
-                        // Does the fetched location already exist on db (if true then it will return the id, otherwise id 0) ?
-                        var existingWeatherEntryId = WeatherRepository.getWeatherEntry(response.name, response.sys.country)?.id ?: 0
+                        // Does the fetched location already exist on db (if true then it will return the actual id, otherwise id 0) ?
+                        var existingWeatherEntryId = WeatherRepository.getWeatherEntry(response.coord.lat,
+                            response.coord.lon)?.id ?: 0
                         if(isCurrentLocation) {
                             existingWeatherEntryId = WeatherRepository.getWeatherEntryCurrentLocation()?.id ?: 0
                         }
@@ -158,8 +159,8 @@ class WeatherViewModel(application: Application, private val selectedLocationRep
                             localWeatherEntry = WeatherRepository.getWeatherEntryCurrentLocation()
                         } else {
                             localWeatherEntry = WeatherRepository.getWeatherEntry(
-                                selectedLocation.value.locationName,
-                                selectedLocation.value.countryCode)
+                                selectedLocation.value.latitude,
+                                selectedLocation.value.longitude)
                         }
 
                         if (localWeatherEntry != null) {

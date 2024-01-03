@@ -10,15 +10,15 @@ import retrofit2.http.Query
 
 interface WeatherApiService {
 
-    // /geo/1.0/direct endpoint
+    // Geocoding endpoint
     @GET("geo/1.0/direct")
     suspend fun getCityWeather(
         @Query("q") cityName: String,
         @Query("limit") limit: Int,
         @Query("appid") apiKey: String
-    ): CityWeatherResponse
+    ): List<LocationWeatherResponse>
 
-    // /data/2.5/weather endpoint
+    // Current Weather endpoint
     @GET("data/2.5/weather")
     suspend fun getWeatherByCoordinates(
         @Query("lat") latitude: Double,
@@ -27,6 +27,7 @@ interface WeatherApiService {
         @Query("appid") apiKey: String
     ): WeatherResponse
 
+    // Forecast endpoint
     @GET("data/2.5/forecast")
     suspend fun getWeatherForecast(
         @Query("lat") latitude: Double,

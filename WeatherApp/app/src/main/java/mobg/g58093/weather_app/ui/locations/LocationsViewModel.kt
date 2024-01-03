@@ -76,8 +76,8 @@ class LocationsViewModel(private val selectedLocationRepository: SelectedLocatio
 
                 // If selected location is the one being deleted, then reset the selected location state
                 if (weatherEntry != null) {
-                    if(selectedLocation.value.locationName == weatherEntry.locationName &&
-                        selectedLocation.value.countryCode == weatherEntry.country) {
+                    if(selectedLocation.value.latitude == weatherEntry.latitude &&
+                        selectedLocation.value.longitude == weatherEntry.longitude) {
                             selectedLocationRepository.resetSelectedLocation()
                     }
                     WeatherRepository.deleteWeatherEntry(weatherEntry)

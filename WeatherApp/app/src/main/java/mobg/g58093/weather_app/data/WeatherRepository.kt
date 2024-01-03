@@ -30,15 +30,15 @@ object WeatherRepository {
         return listOf()
     }
 
-    suspend fun getAllForecastsByLocation(locationName: String) : List<ForecastEntry> {
+    suspend fun getAllForecastsByLocation(id: Int) : List<ForecastEntry> {
         database?.let { theDatabase ->
-            return theDatabase.weatherDao().getAllForecastEntriesByLocation(locationName)
+            return theDatabase.weatherDao().getAllForecastEntriesByWeather(id)
         }
         return listOf()
     }
-    suspend fun getWeatherEntry(locationName: String, country : String): WeatherEntry? {
+    suspend fun getWeatherEntry(lat: Double, long : Double): WeatherEntry? {
         database?.let { theDatabase ->
-            return theDatabase.weatherDao().getWeatherEntry(locationName, country)
+            return theDatabase.weatherDao().getWeatherEntry(lat, long)
         }
         return null
     }

@@ -6,20 +6,19 @@ import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "main_weather",
-    indices = [Index(value = ["locationName", "country"], unique = true)]
+    indices = [Index(value = ["longitude", "latitude"], unique = true)]
 )
 data class WeatherEntry (
 
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
 
-    // unique
     val locationName : String,
-    // unique
+
     val country : String,
 
+    // Unique pair
     val longitude : Double,
-
     val latitude : Double,
 
     val date : String,

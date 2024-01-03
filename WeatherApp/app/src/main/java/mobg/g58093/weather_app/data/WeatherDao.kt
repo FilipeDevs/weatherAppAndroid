@@ -19,11 +19,11 @@ interface WeatherDao {
     @Query("SELECT * from main_weather")
     suspend fun getAllWeatherEntries(): List<WeatherEntry>
 
-    @Query("SELECT * from forecast_weather WHERE locationName = :name")
-    suspend fun getAllForecastEntriesByLocation(name : String): List<ForecastEntry>
+    @Query("SELECT * from forecast_weather WHERE weatherEntryId = :id")
+    suspend fun getAllForecastEntriesByWeather(id: Int): List<ForecastEntry>
 
-    @Query("SELECT * from main_weather WHERE locationName = :name AND country = :country")
-    fun getWeatherEntry(name : String, country : String) : WeatherEntry
+    @Query("SELECT * from main_weather WHERE latitude = :lat AND longitude = :longitude")
+    fun getWeatherEntry(lat : Double, longitude : Double) : WeatherEntry
 
     @Query("SELECT * from main_weather WHERE id = :id")
     fun getWeatherEntry(id : Int) : WeatherEntry
