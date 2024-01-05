@@ -2,7 +2,9 @@ package mobg.g58093.weather_app.network
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
-import mobg.g58093.weather_app.data.ForecastResponse
+import mobg.g58093.weather_app.network.responses.ForecastResponse
+import mobg.g58093.weather_app.network.responses.LocationWeatherResponse
+import mobg.g58093.weather_app.network.responses.WeatherResponse
 import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Retrofit
 import retrofit2.http.GET
@@ -23,7 +25,7 @@ interface WeatherApiService {
     suspend fun getWeatherByCoordinates(
         @Query("lat") latitude: Double,
         @Query("lon") longitude: Double,
-        @Query("units") units : String,
+        @Query("units") units: String,
         @Query("appid") apiKey: String
     ): WeatherResponse
 
@@ -32,7 +34,7 @@ interface WeatherApiService {
     suspend fun getWeatherForecast(
         @Query("lat") latitude: Double,
         @Query("lon") longitude: Double,
-        @Query("units") units : String,
+        @Query("units") units: String,
         @Query("appid") apiKey: String,
     ): ForecastResponse
 }

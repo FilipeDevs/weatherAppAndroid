@@ -1,4 +1,4 @@
-package mobg.g58093.weather_app
+package mobg.g58093.weather_app.util
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -6,6 +6,9 @@ import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationServices
 import android.Manifest
+import android.location.LocationManager
+import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.content.getSystemService
 
 
 var TAG = "Location Manager"
@@ -32,6 +35,11 @@ fun getCurrentLocation(context: Context, callback: (Double, Double) -> Unit) {
             // Handle location retrieval failure
             exception.printStackTrace()
         }
+}
+
+fun checkIsGPSEnabled(context: Context) : Boolean {
+    val mLocationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    return mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
 }
 
 

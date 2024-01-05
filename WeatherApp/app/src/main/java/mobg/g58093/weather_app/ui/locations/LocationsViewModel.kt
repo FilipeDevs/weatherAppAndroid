@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import mobg.g58093.weather_app.SelectedLocationRepository
-import mobg.g58093.weather_app.SelectedLocationState
+import mobg.g58093.weather_app.util.SelectedLocationRepository
+import mobg.g58093.weather_app.util.SelectedLocationState
 import mobg.g58093.weather_app.data.WeatherEntry
 import mobg.g58093.weather_app.data.WeatherRepository
 
@@ -32,6 +32,8 @@ class LocationsViewModel(private val selectedLocationRepository: SelectedLocatio
 
     init {
         viewModelScope.launch {
+            Log.d(TAG, "init LocationsViewModel")
+            getAllUserLocations()
             observeSelectedCityState()
         }
     }
@@ -57,13 +59,15 @@ class LocationsViewModel(private val selectedLocationRepository: SelectedLocatio
             withContext(Dispatchers.IO) {
                 val weatherEntry = WeatherRepository.getWeatherEntry(id)
                 if (weatherEntry != null) {
-                    selectedLocationRepository.editSelectLocation(SelectedLocationState(
+                    selectedLocationRepository.editSelectLocation(
+                        SelectedLocationState(
                         locationName = weatherEntry.locationName,
                         countryCode = weatherEntry.country,
                         longitude = weatherEntry.longitude,
                         latitude = weatherEntry.latitude,
                         currentLocation = weatherEntry.currentLocation
-                    ))
+                    )
+                    )
                 }
             }
         }

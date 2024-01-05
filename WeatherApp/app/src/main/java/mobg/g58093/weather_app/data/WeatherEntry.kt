@@ -8,44 +8,44 @@ import androidx.room.PrimaryKey
     tableName = "main_weather",
     indices = [Index(value = ["longitude", "latitude"], unique = true)]
 )
-data class WeatherEntry (
+data class WeatherEntry(
 
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
 
-    val locationName : String,
+    val locationName: String,
 
-    val country : String,
+    val country: String,
 
     // Unique pair
-    val longitude : Double,
-    val latitude : Double,
+    val longitude: Double,
+    val latitude: Double,
 
-    val date : String,
+    val date: String,
 
-    val mainTemp : Int,
+    val mainTemp: Int,
 
-    val highTemp : Int,
+    val highTemp: Int,
 
-    val lowTemp : Int,
+    val lowTemp: Int,
 
-    val weatherType : String,
+    val weatherType: String,
 
-    val weatherIcon : String,
+    val weatherIcon: String,
 
-    val sunriseHour : String,
+    val sunriseHour: String,
 
-    val sunsetHour : String,
+    val sunsetHour: String,
 
-    val wind : Double,
+    val wind: Double,
 
-    val humidity : Int,
+    val humidity: Int,
 
-    val visibility : Int,
+    val visibility: Int,
 
-    val pressure : Int,
+    val pressure: Int,
 
-    val currentLocation : Boolean
+    val currentLocation: Boolean
 )
 
 

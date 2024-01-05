@@ -4,25 +4,26 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import mobg.g58093.weather_app.PropertiesManager
+import kotlinx.coroutines.withContext
+import mobg.g58093.weather_app.util.PropertiesManager
+import mobg.g58093.weather_app.data.WeatherEntry
+import mobg.g58093.weather_app.data.WeatherRepository
+import mobg.g58093.weather_app.network.responses.LocationWeatherResponse
 import mobg.g58093.weather_app.network.RetroApi
+import mobg.g58093.weather_app.network.responses.WeatherResponse
 import mobg.g58093.weather_app.network.isOnline
-import mobg.g58093.weather_app.ui.home.WeatherApiState
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-data class SearchResult(
-    val locationName : String,
-    val countryCode : String,
-    val state : String = "",
-    val longitude : Double,
-    val latitude : Double
-)
 
 sealed class SearchApiState {
     object Loading : SearchApiState()
-    data class Success(val data: List<SearchResult>) : SearchApiState()
+    data class Success(val data: List<LocationWeatherResponse> = listOf()) : SearchApiState()
     data class Error(val message: String) : SearchApiState()
 }
 
@@ -31,10 +32,11 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
     private val context = application
 
     // Some states
-    private val _searchState = MutableStateFlow<SearchApiState>(SearchApiState.Loading)
+    private val _searchState = MutableStateFlow<SearchApiState>(SearchApiState.Success())
     val searchState: StateFlow<SearchApiState> = _searchState
 
     private val apiKey = PropertiesManager.getApiKey(application)
+    private val units = PropertiesManager.getUnits(application)
 
     private val TAG = "SearchViewModel"
 
@@ -44,6 +46,7 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
             if(isOnline(context)) { // Check internet connection
                 try {
                     val response = RetroApi.weatherService.getCityWeather(searchQuery, 5,apiKey)
+                    _searchState.value = SearchApiState.Success(response)
                 } catch (e: Exception) {
                     Log.e(TAG, "Encountered an error : ${e.message}")
                     _searchState.value = SearchApiState.Error("An unexpected error occurred")
@@ -54,6 +57,58 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
                         "of internet connection")
             }
         }
+    }
+
+    fun addLocationToFavorites(location: LocationWeatherResponse) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val weatherEntry : WeatherEntry? = WeatherRepository.getWeatherEntry(location.lat, location.lon)
+                if(weatherEntry == null) { // The location has not been added yet
+                    // Weather api call to OpenWeather
+                    val response = RetroApi.weatherService.getWeatherByCoordinates(location.lat, location.lon, units, apiKey)
+                    // Run db operations
+
+                    val newWeatherEntry = convertWeatherResponseToWeatherEntry(response)
+                    WeatherRepository.insertWeatherEntry(newWeatherEntry)
+
+                }
+            }
+        }
+    }
+
+    private fun convertWeatherResponseToWeatherEntry(weatherResponse: WeatherResponse) : WeatherEntry {
+        return WeatherEntry(
+            id = 0,
+            locationName = weatherResponse.name,
+            longitude = weatherResponse.coord.lon,
+            latitude = weatherResponse.coord.lat,
+            date = convertCurrentDateToFormattedDate(),
+            mainTemp = weatherResponse.main.temp.toInt(),
+            highTemp = weatherResponse.main.temp_max.toInt(),
+            lowTemp = weatherResponse.main.temp_min.toInt(),
+            weatherType = weatherResponse.weather[0].description,
+            weatherIcon =  weatherResponse.weather[0].icon,
+            sunriseHour =  convertUnixTimestampToHourAndMinutes(weatherResponse.sys.sunrise),
+            sunsetHour =  convertUnixTimestampToHourAndMinutes(weatherResponse.sys.sunset),
+            wind = weatherResponse.wind.speed,
+            humidity =  weatherResponse.main.humidity,
+            visibility = weatherResponse.visibility,
+            pressure = weatherResponse.main.pressure,
+            currentLocation = false,
+            country = weatherResponse.sys.country
+        )
+    }
+
+    private fun convertCurrentDateToFormattedDate(): String {
+        val date = Date()
+        val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
+        return sdf.format(date)
+    }
+
+    private fun convertUnixTimestampToHourAndMinutes(unixTimestamp: Long): String {
+        val date = Date(unixTimestamp * 1000L)
+        val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
+        return sdf.format(date)
     }
 
 }

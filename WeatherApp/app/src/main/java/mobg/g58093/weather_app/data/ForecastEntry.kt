@@ -9,8 +9,8 @@ import androidx.room.PrimaryKey
     foreignKeys = [
         ForeignKey(
             entity = WeatherEntry::class,
-            parentColumns = ["id"], // Use the primary key of WeatherEntry
-            childColumns = ["weatherEntryId"], // Reference WeatherEntry by id
+            parentColumns = ["id"],
+            childColumns = ["weatherEntryId"],
             onDelete = ForeignKey.CASCADE
         )
     ]
@@ -20,18 +20,18 @@ data class ForecastEntry(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
 
-    val locationName : String,
+    val locationName: String,
 
     // fk to weather entry
-    val weatherEntryId: Int, // Foreign key referencing WeatherEntry
+    val weatherEntryId: Int,
 
-    val date : String,
+    val date: String,
 
-    var tempMax : Int,
+    var tempMax: Int,
 
-    var tempMin : Int,
+    var tempMin: Int,
 
     val humidity: Int,
 
-    val icon : String
-    )
+    val icon: String
+)

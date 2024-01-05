@@ -9,12 +9,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import mobg.g58093.weather_app.SelectedLocationRepository
-import mobg.g58093.weather_app.SelectedLocationState
+import mobg.g58093.weather_app.util.SelectedLocationRepository
+import mobg.g58093.weather_app.util.SelectedLocationState
 import mobg.g58093.weather_app.data.ForecastEntry
-import mobg.g58093.weather_app.data.ForecastResponse
-import mobg.g58093.weather_app.data.ForecastWeather
-import mobg.g58093.weather_app.data.MainWeather
+import mobg.g58093.weather_app.network.responses.ForecastWeather
 import mobg.g58093.weather_app.data.WeatherEntry
 import mobg.g58093.weather_app.data.WeatherRepository
 import mobg.g58093.weather_app.network.RetroApi
@@ -42,6 +40,7 @@ class ForecastViewModel(application: Application, private val selectedLocationRe
 
     init {
         viewModelScope.launch {
+            Log.d(TAG, "init Forecast")
             observeSelectedCityState()
             getForecast()
         }

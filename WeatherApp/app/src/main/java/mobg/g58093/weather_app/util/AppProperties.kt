@@ -1,6 +1,7 @@
-package mobg.g58093.weather_app
+package mobg.g58093.weather_app.util
 
 import android.content.Context
+import mobg.g58093.weather_app.R
 import java.util.Properties
 
 object PropertiesManager {

@@ -23,14 +23,14 @@ interface WeatherDao {
     suspend fun getAllForecastEntriesByWeather(id: Int): List<ForecastEntry>
 
     @Query("SELECT * from main_weather WHERE latitude = :lat AND longitude = :longitude")
-    fun getWeatherEntry(lat : Double, longitude : Double) : WeatherEntry
+    fun getWeatherEntry(lat: Double, longitude: Double): WeatherEntry
 
     @Query("SELECT * from main_weather WHERE id = :id")
-    fun getWeatherEntry(id : Int) : WeatherEntry
+    fun getWeatherEntry(id: Int): WeatherEntry
 
 
     @Query("SELECT * from main_weather WHERE currentLocation = 1")
-    fun getWeatherEntryCurrentLocation() : WeatherEntry
+    fun getWeatherEntryCurrentLocation(): WeatherEntry
 
     @Query("SELECT * FROM main_weather WHERE currentLocation = 0 LIMIT 1")
     suspend fun getFirstNonCurrentLocationEntry(): WeatherEntry?

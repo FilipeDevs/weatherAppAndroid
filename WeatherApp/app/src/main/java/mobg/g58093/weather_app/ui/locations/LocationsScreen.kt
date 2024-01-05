@@ -33,9 +33,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import mobg.g58093.weather_app.AppViewModelProvider
+import mobg.g58093.weather_app.util.AppViewModelProvider
 import mobg.g58093.weather_app.R
-import mobg.g58093.weather_app.SelectedLocationState
+import mobg.g58093.weather_app.util.SelectedLocationState
 import mobg.g58093.weather_app.data.WeatherEntry
 
 

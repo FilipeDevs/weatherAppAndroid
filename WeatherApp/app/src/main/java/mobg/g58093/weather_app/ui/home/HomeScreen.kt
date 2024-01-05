@@ -1,13 +1,9 @@
 package mobg.g58093.weather_app.ui.home
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.provider.Settings
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
-import android.util.Log
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -21,6 +17,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,7 +39,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import mobg.g58093.weather_app.R
+import mobg.g58093.weather_app.util.SelectedLocationState
+import mobg.g58093.weather_app.util.checkIsGPSEnabled
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -50,258 +53,312 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     weatherViewModel: WeatherViewModel,
     navigateToDetails: () -> Unit,
-    )
-{
-        val weatherState by weatherViewModel.weatherState.collectAsState() // Main weather state
-        val permissionState by weatherViewModel.requestLocationPermission.collectAsState() // Current app perms state
-        val selectedLocation by weatherViewModel.selectedLocation.collectAsState() // Selected location state
-        var permission by remember { mutableStateOf(true) } // rationale state
-        val context = LocalContext.current
+    snackbarHostState: SnackbarHostState,
+    scope: CoroutineScope
+) {
+    val context = LocalContext.current
 
-        // Create a permission launcher
-        val requestPermissionLauncher =
-            rememberLauncherForActivityResult(
+    val weatherState by weatherViewModel.weatherState.collectAsState() // Main weather state
+    val selectedLocation by weatherViewModel.selectedLocation.collectAsState() // Selected location state
+
+    val permissionState by weatherViewModel.locationPermission.collectAsState() // Permissions state
+    val gpsState by weatherViewModel.gpsStatus.collectAsState() // Gps
+
+    val firstLaunch by weatherViewModel.firstLaunch.collectAsState() // Has the VM initialized
+
+    var showRationalte by remember { mutableStateOf(false) } // rationale state
+
+    // Create a permission launcher
+    val requestPermissionLauncher =
+        rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission(),
             onResult = { isGranted: Boolean ->
                 if (isGranted) {
                     weatherViewModel.updatePermissions(true)
-                    permission = true
                     // permissions granted so fetch current location
                     weatherViewModel.fetchWeatherCurrentLocation()
+                    weatherViewModel.updateFirstLaunch()
                 } else {
                     weatherViewModel.updatePermissions(false)
-                    permission = false
+                    showRationalte = true
                 }
+
             })
 
-        if (!permission) {
-            ShowLocationPermissionPopup(context)
-        }
+    LaunchedEffect(Unit) {
+        // Show snackbar if gps is not enabled (and app has permissions)
+        if (!gpsState && selectedLocation.currentLocation && permissionState) {
+            val result = snackbarHostState.showSnackbar(
+                message = "Please enable GPS",
+                actionLabel = "Enable GPS",
+                duration = SnackbarDuration.Short
+            )
+            when (result) {
+                SnackbarResult.ActionPerformed -> {
+                    val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                    context.startActivity(intent)
+                }
 
-        LaunchedEffect(selectedLocation.currentLocation) {
-            // Only request permissions if the selected location is current location
-            if (!permissionState) {
-                requestPermissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
+                SnackbarResult.Dismissed -> {}
             }
         }
+        // Request permissions (only on first launch)
+        if (!permissionState && selectedLocation.currentLocation && !firstLaunch) {
+            requestPermissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+    }
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.Center, // Center vertically
-            horizontalAlignment = Alignment.CenterHorizontally // Center horizontally
-        ) {
-            when(val currentState = weatherState) {
-                is WeatherApiState.Loading -> {
-                    Text("Loading...")
-                }
-                is WeatherApiState.Success -> {
-                    Spacer(modifier = Modifier.height(20.dp))
-                    Text(
-                        text = currentState.data.locationName
-                                + " - " + currentState.data.country,
-                        style = TextStyle(
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight(400),
-                            color  = Color(0xFF616161)
-                        )
-                    )
-                    Spacer(modifier = Modifier.height(5.dp))
-                    // Date
-                    Text(
-                        text = convertCurrentDateToFormattedDate(),
-                        style = TextStyle(
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight(400),
-                            color  = Color(0xFF616161)
-                        )
-                    )
-                    // Current temperature
-                    Text(
-                        text = currentState.data.mainTemp.toString() + "°C",
-                        style = TextStyle(
-                            fontSize = 80.sp,
-                            fontWeight = FontWeight(400),
-                            color = Color(0xFFFFFFFF),
-                        )
-                    )
-                    Spacer(modifier = Modifier.height(5.dp))
-                    // Highest and Lowest Temperatures
-                    Row(
-                    ) {
-                        Column {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Image(
-                                    modifier = Modifier
-                                        .width(12.dp)
-                                        .height(17.dp),
-                                    painter = painterResource(id = R.drawable.downarrow),
-                                    contentDescription = "image description",
-                                    contentScale = ContentScale.None
-                                )
-                                Spacer(modifier = Modifier.width(2.dp))
-                                Text(
-                                    text = currentState.data.lowTemp.toString() + "°C",
-                                    style = TextStyle(
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight(400),
-                                        color = Color(0xFF616161),
-                                    )
-                                )
-                            }
+    if (showRationalte && !firstLaunch) {
+        ShowLocationPermissionPopup(context, weatherViewModel)
+    }
 
+    Column(
+        modifier = Modifier
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        when (val currentState = weatherState) {
+            is WeatherApiState.Loading -> {
+                Text("Loading...")
+            }
+
+            is WeatherApiState.Success -> {
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    text = currentState.data.locationName
+                            + " - " + currentState.data.country,
+                    style = TextStyle(
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight(400),
+                        color = Color(0xFF616161)
+                    )
+                )
+                Spacer(modifier = Modifier.height(5.dp))
+                // Date
+                Text(
+                    text = convertCurrentDateToFormattedDate(),
+                    style = TextStyle(
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight(400),
+                        color = Color(0xFF616161)
+                    )
+                )
+                // Current temperature
+                Text(
+                    text = currentState.data.mainTemp.toString() + "°C",
+                    style = TextStyle(
+                        fontSize = 80.sp,
+                        fontWeight = FontWeight(400),
+                        color = Color(0xFFFFFFFF),
+                    )
+                )
+                Spacer(modifier = Modifier.height(5.dp))
+                // Highest and Lowest Temperatures
+                Row(
+                ) {
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Image(
+                                modifier = Modifier
+                                    .width(12.dp)
+                                    .height(17.dp),
+                                painter = painterResource(id = R.drawable.downarrow),
+                                contentDescription = "image description",
+                                contentScale = ContentScale.None
+                            )
+                            Spacer(modifier = Modifier.width(2.dp))
+                            Text(
+                                text = currentState.data.lowTemp.toString() + "°C",
+                                style = TextStyle(
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight(400),
+                                    color = Color(0xFF616161),
+                                )
+                            )
                         }
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Column {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Image(
-                                    modifier = Modifier
-                                        .width(12.dp)
-                                        .height(17.dp),
-                                    painter = painterResource(id = R.drawable.uparrow),
-                                    contentDescription = "image description",
-                                    contentScale = ContentScale.None
-                                )
-                                Spacer(modifier = Modifier.width(2.dp))
-                                Text(
-                                    text = currentState.data.highTemp.toString() + "°C",
-                                    style = TextStyle(
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight(400),
-                                        color = Color(0xFF616161),
-                                    )
-                                )
-                            }
 
-                        }
                     }
-                    // Weather Icon
-                    AsyncImage(
-                        modifier = Modifier
-                            .width(190.dp)
-                            .height(180.dp),
-                        model = "https://openweathermap.org/img/wn/${(weatherState as WeatherApiState.Success).data.weatherIcon}@2x.png",
-                        placeholder = painterResource(id = R.drawable.deviconweather),
-                        contentDescription = "The delasign logo",
-                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Image(
+                                modifier = Modifier
+                                    .width(12.dp)
+                                    .height(17.dp),
+                                painter = painterResource(id = R.drawable.uparrow),
+                                contentDescription = "image description",
+                                contentScale = ContentScale.None
+                            )
+                            Spacer(modifier = Modifier.width(2.dp))
+                            Text(
+                                text = currentState.data.highTemp.toString() + "°C",
+                                style = TextStyle(
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight(400),
+                                    color = Color(0xFF616161),
+                                )
+                            )
+                        }
 
+                    }
+                }
+                // Weather Icon
+                AsyncImage(
+                    modifier = Modifier
+                        .width(190.dp)
+                        .height(180.dp),
+                    model = "https://openweathermap.org/img/wn/${(weatherState as WeatherApiState.Success).data.weatherIcon}@2x.png",
+                    placeholder = painterResource(id = R.drawable.deviconweather),
+                    contentDescription = "The delasign logo",
+                )
+
+                Text(
+                    text = currentState.data.weatherType,
+                    style = TextStyle(
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight(400),
+                        color = Color(0xFF616161),
+                    )
+                )
+                Spacer(modifier = Modifier.height(15.dp))
+                // Sunrise and Sunset
+                Row(
+                ) {
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Image(
+                                modifier = Modifier
+                                    .width(19.dp)
+                                    .height(17.dp),
+                                painter = painterResource(id = R.drawable.sunrisevector),
+                                contentDescription = "image description",
+                                contentScale = ContentScale.None
+                            )
+                            Spacer(modifier = Modifier.width(2.dp))
+                            Text(
+                                text = currentState.data.sunriseHour,
+                                style = TextStyle(
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight(400),
+                                    color = Color(0xFF616161),
+                                )
+                            )
+                        }
+
+                    }
+                    Spacer(modifier = Modifier.width(20.dp))
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Image(
+                                modifier = Modifier
+                                    .width(19.dp)
+                                    .height(17.dp),
+                                painter = painterResource(id = R.drawable.sunsetvector),
+                                contentDescription = "image description",
+                                contentScale = ContentScale.None
+                            )
+                            Spacer(modifier = Modifier.width(2.dp))
+                            Text(
+                                text = currentState.data.sunsetHour,
+                                style = TextStyle(
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight(400),
+                                    color = Color(0xFF616161),
+                                )
+                            )
+                        }
+
+                    }
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+                Button(
+                    onClick = navigateToDetails,
+                    modifier = Modifier.padding(8.dp)
+                ) {
                     Text(
-                        text = currentState.data.weatherType,
+                        text = "Details",
                         style = TextStyle(
                             fontSize = 18.sp,
                             fontWeight = FontWeight(400),
                             color = Color(0xFF616161),
                         )
                     )
-                    Spacer(modifier = Modifier.height(15.dp))
-                    // Sunrise and Sunset
-                    Row(
-                    ) {
-                        Column {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Image(
-                                    modifier = Modifier
-                                        .width(19.dp)
-                                        .height(17.dp),
-                                    painter = painterResource(id = R.drawable.sunrisevector),
-                                    contentDescription = "image description",
-                                    contentScale = ContentScale.None
-                                )
-                                Spacer(modifier = Modifier.width(2.dp))
-                                Text(
-                                    text = currentState.data.sunriseHour,
-                                    style = TextStyle(
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight(400),
-                                        color = Color(0xFF616161),
-                                    )
-                                )
-                            }
-
-                        }
-                        Spacer(modifier = Modifier.width(20.dp))
-                        Column {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Image(
-                                    modifier = Modifier
-                                        .width(19.dp)
-                                        .height(17.dp),
-                                    painter = painterResource(id = R.drawable.sunsetvector),
-                                    contentDescription = "image description",
-                                    contentScale = ContentScale.None
-                                )
-                                Spacer(modifier = Modifier.width(2.dp))
-                                Text(
-                                    text = currentState.data.sunsetHour,
-                                    style = TextStyle(
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight(400),
-                                        color = Color(0xFF616161),
-                                    )
-                                )
-                            }
-
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(20.dp))
-                    Button(
-                        onClick = navigateToDetails,
-                        modifier = Modifier.padding(8.dp)
-                    ) {
-                        Text(
-                            text = "Details",
-                            style = TextStyle(
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight(400),
-                                color = Color(0xFF616161),
-                            )
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(20.dp))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = "Last updated : " + currentState.data.date,
-                            style = TextStyle(
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight(400),
-                                color = Color(0xFF616161),
-                            )
-                        )
-                        Spacer(modifier = Modifier.width(5.dp))
-                        Button(
-                            onClick = { weatherViewModel.refreshData() },
-                            modifier = Modifier.padding(8.dp)
-
-                        ) {
-                            Text(
-                                text = "Refresh",
-                                color = Color.White
-                            )
-                        }
-                    }
-
                 }
-                else -> {
-                    // Show error state
-                    val errorMessage = (weatherState as WeatherApiState.Error).message
-                    Text("Error: $errorMessage")
+
+                Spacer(modifier = Modifier.height(20.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = "Last updated : " + currentState.data.date,
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight(400),
+                            color = Color(0xFF616161),
+                        )
+                    )
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Button(
+                        onClick = {
+                            weatherViewModel.refreshData()
+                            showGpsSnackbar(context, selectedLocation, snackbarHostState, scope)
+                        },
+                        modifier = Modifier.padding(8.dp)
+
+                    ) {
+                        Text(
+                            text = "Refresh",
+                            color = Color.White
+                        )
+                    }
                 }
             }
 
+            else -> {
+                // Show error state
+                val errorMessage = (weatherState as WeatherApiState.Error).message
+                Text("Error: $errorMessage")
+            }
         }
+
+    }
+}
+
+fun showGpsSnackbar(
+    context: Context, selectedLocation: SelectedLocationState,
+    snackbarHostState: SnackbarHostState,
+    scope: CoroutineScope
+) {
+    scope.launch {
+        if (!checkIsGPSEnabled(context) && selectedLocation.currentLocation) {
+            val result = snackbarHostState.showSnackbar(
+                message = "Please enable GPS",
+                actionLabel = "Enable GPS",
+                duration = SnackbarDuration.Short
+            )
+            when (result) {
+                SnackbarResult.ActionPerformed -> {
+                    val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                    context.startActivity(intent)
+                }
+
+                SnackbarResult.Dismissed -> {
+                }
+            }
+        }
+    }
 }
 
 @Composable
-fun ShowLocationPermissionPopup(context: Context) {
+fun ShowLocationPermissionPopup(context: Context, weatherViewModel: WeatherViewModel) {
     // State to track whether the dialog is shown
     var isDialogVisible by remember { mutableStateOf(true) }
 
     if (isDialogVisible) {
         AlertDialog(
             onDismissRequest = {
+                weatherViewModel.updateFirstLaunch()
                 isDialogVisible = false
             },
             title = { Text("Location Permission Required") },
@@ -318,6 +375,7 @@ fun ShowLocationPermissionPopup(context: Context) {
                         val uri: Uri = Uri.fromParts("package", context.packageName, null)
                         intent.data = uri
                         context.startActivity(intent)
+                        weatherViewModel.updateFirstLaunch()
                         isDialogVisible = false
                     }
                 ) {
@@ -326,6 +384,7 @@ fun ShowLocationPermissionPopup(context: Context) {
             },
             dismissButton = {
                 Button(onClick = {
+                    weatherViewModel.updateFirstLaunch()
                     isDialogVisible = false
                 }) {
                     Text("Dismiss")
@@ -338,7 +397,7 @@ fun ShowLocationPermissionPopup(context: Context) {
 
 fun convertCurrentDateToFormattedDate(): String {
     val date = Date()
-    val sdf = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
+    val sdf = SimpleDateFormat("MMM d, yyyy", Locale.US)
     return sdf.format(date)
 }
 

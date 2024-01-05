@@ -28,117 +28,117 @@ fun DetailsScreen(
     modifier: Modifier = Modifier,
     navigateToForecast: () -> Unit,
     weatherViewModel: WeatherViewModel,
-)
-{
-        val weatherState by weatherViewModel.weatherState.collectAsState()
+) {
+    val weatherState by weatherViewModel.weatherState.collectAsState()
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.Center, // Center vertically
-            horizontalAlignment = Alignment.CenterHorizontally // Center horizontally
-        ) {
-            when(val currentState = weatherState) {
-                is WeatherApiState.Loading -> {
-                    Text("Loading...")
-                }
-                is WeatherApiState.Success -> {
-                    Text(
-                        text = "Details",
-                        style = TextStyle(
-                            fontSize = 36.sp,
-                            fontWeight = FontWeight(400),
-                            color = Color(0xFFFFFFFF),
-                        )
-                    )
-                    Spacer(modifier = Modifier.height(20.dp))
-                    Text(
-                        text = "Wind",
-                        style = TextStyle(
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight(400),
-                            color = Color(0xFF616161),
-
-                            )
-                    )
-                    Text(
-                        text =  currentState.data.wind.toString() + " km/h",
-                        style = TextStyle(
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight(400),
-                            color = Color(0xFFFFFFFF),
-
-                            )
-                    )
-                    Spacer(modifier = Modifier.height(20.dp))
-                    Text(
-                        text = "Humidity",
-                        style = TextStyle(
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight(400),
-                            color = Color(0xFF616161),
-
-                            )
-                    )
-                    Text(
-                        text =  currentState.data.humidity.toString() + "%",
-                        style = TextStyle(
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight(400),
-                            color = Color(0xFFFFFFFF),
-
-                            )
-                    )
-                    Spacer(modifier = Modifier.height(20.dp))
-                    Text(
-                        text = "Visibility",
-                        style = TextStyle(
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight(400),
-                            color = Color(0xFF616161),
-
-                            )
-                    )
-                    Text(
-                        text =  currentState.data.visibility.toString(),
-                        style = TextStyle(
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight(400),
-                            color = Color(0xFFFFFFFF),
-                        )
-                    )
-                    Spacer(modifier = Modifier.height(20.dp))
-                    Text(
-                        text = "Pressure",
-                        style = TextStyle(
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight(400),
-                            color = Color(0xFF616161),
-
-                            )
-                    )
-                    Text(
-                        text =  currentState.data.pressure.toString() + " hPa",
-                        style = TextStyle(
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight(400),
-                            color = Color(0xFFFFFFFF),
-
-                            )
-                    )
-                    Spacer(modifier = Modifier.height(50.dp))
-                    Button(
-                        onClick = navigateToForecast,
-                        modifier = Modifier.padding(8.dp)
-                    ) {
-                        Text(text = "Forecast")
-                    }
-                }
-
-                else -> {}
+    Column(
+        modifier = Modifier
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Center, // Center vertically
+        horizontalAlignment = Alignment.CenterHorizontally // Center horizontally
+    ) {
+        when (val currentState = weatherState) {
+            is WeatherApiState.Loading -> {
+                Text("Loading...")
             }
 
+            is WeatherApiState.Success -> {
+                Text(
+                    text = "Details",
+                    style = TextStyle(
+                        fontSize = 36.sp,
+                        fontWeight = FontWeight(400),
+                        color = Color(0xFFFFFFFF),
+                    )
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    text = "Wind",
+                    style = TextStyle(
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight(400),
+                        color = Color(0xFF616161),
+
+                        )
+                )
+                Text(
+                    text = currentState.data.wind.toString() + " km/h",
+                    style = TextStyle(
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight(400),
+                        color = Color(0xFFFFFFFF),
+
+                        )
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    text = "Humidity",
+                    style = TextStyle(
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight(400),
+                        color = Color(0xFF616161),
+
+                        )
+                )
+                Text(
+                    text = currentState.data.humidity.toString() + "%",
+                    style = TextStyle(
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight(400),
+                        color = Color(0xFFFFFFFF),
+
+                        )
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    text = "Visibility",
+                    style = TextStyle(
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight(400),
+                        color = Color(0xFF616161),
+
+                        )
+                )
+                Text(
+                    text = currentState.data.visibility.toString(),
+                    style = TextStyle(
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight(400),
+                        color = Color(0xFFFFFFFF),
+                    )
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    text = "Pressure",
+                    style = TextStyle(
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight(400),
+                        color = Color(0xFF616161),
+
+                        )
+                )
+                Text(
+                    text = currentState.data.pressure.toString() + " hPa",
+                    style = TextStyle(
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight(400),
+                        color = Color(0xFFFFFFFF),
+
+                        )
+                )
+                Spacer(modifier = Modifier.height(50.dp))
+                Button(
+                    onClick = navigateToForecast,
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    Text(text = "Forecast")
+                }
+            }
+
+            else -> {}
         }
+
+    }
 }
 
 @Preview(showBackground = true)
