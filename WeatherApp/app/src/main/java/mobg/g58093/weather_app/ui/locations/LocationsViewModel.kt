@@ -32,7 +32,6 @@ class LocationsViewModel(private val selectedLocationRepository: SelectedLocatio
 
     init {
         viewModelScope.launch {
-            Log.d(TAG, "init LocationsViewModel")
             getAllUserLocations()
             observeSelectedCityState()
         }
@@ -73,18 +72,39 @@ class LocationsViewModel(private val selectedLocationRepository: SelectedLocatio
         }
     }
 
+    private suspend fun selectAnotherLocation() {
+        withContext(Dispatchers.IO) {
+            val weatherList = WeatherRepository.getAllWeatherEntries()
+            if (weatherList.isNotEmpty()) {
+                val weatherEntry : WeatherEntry = weatherList[0]
+                selectedLocationRepository.editSelectLocation(
+                    SelectedLocationState(
+                        locationName = weatherEntry.locationName,
+                        latitude = weatherEntry.latitude,
+                        longitude = weatherEntry.longitude,
+                        countryCode = weatherEntry.country,
+                        currentLocation = weatherEntry.currentLocation
+                    )
+                )
+            } else {
+                selectedLocationRepository.editSelectLocation(SelectedLocationState())
+            }
+        }
+    }
+
     fun deleteWeatherEntry(id : Int) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 val weatherEntry : WeatherEntry? = WeatherRepository.getWeatherEntry(id)
 
-                // If selected location is the one being deleted, then reset the selected location state
+                // If selected location is the one being deleted, then select another location
                 if (weatherEntry != null) {
+                    WeatherRepository.deleteWeatherEntry(weatherEntry)
                     if(selectedLocation.value.latitude == weatherEntry.latitude &&
                         selectedLocation.value.longitude == weatherEntry.longitude) {
-                            selectedLocationRepository.resetSelectedLocation()
+                        selectAnotherLocation()
                     }
-                    WeatherRepository.deleteWeatherEntry(weatherEntry)
+
                 }
                 getAllUserLocations()
             }

@@ -109,22 +109,13 @@ private fun ForecastList(forecastList : List<ForecastEntry>, modifier: Modifier)
                     contentDescription = "The delasign logo",
                 )
                 Text(
-                    text = item.tempMin.toString() + "°",
+                    text = item.temp.toString() + "°",
                     style = TextStyle(
                         fontSize = 16.sp,
                         fontWeight = FontWeight(400),
                         color = Color(0xFF616161),
 
                         )
-                )
-                Spacer(modifier = Modifier.width(7.dp))
-                Text(
-                    text = item.tempMax.toString() + "°",
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight(400),
-                        color = Color(0xFFFFFFFF),
-                    )
                 )
             }
         }

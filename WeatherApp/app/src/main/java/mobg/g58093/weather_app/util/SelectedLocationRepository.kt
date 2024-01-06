@@ -21,8 +21,11 @@ class SelectedLocationRepository {
         _selectedLocationState.value = selectedLocationState
     }
 
-    fun resetSelectedLocation() {
-        _selectedLocationState.value = SelectedLocationState()
+    fun isLocationStateEmpty(): Boolean {
+        val defaultLocationState = SelectedLocationState()
+        val currentLocationState = _selectedLocationState.value
+        return currentLocationState == defaultLocationState
     }
+
 }
 

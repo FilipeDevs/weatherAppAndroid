@@ -34,8 +34,7 @@ sealed class WeatherApiState {
 }
 
 class WeatherViewModel(
-    application: Application,
-    private val selectedLocationRepository: SelectedLocationRepository
+    application: Application, private val selectedLocationRepository: SelectedLocationRepository
 ) : AndroidViewModel(application) {
 
     private val context = application
@@ -69,8 +68,7 @@ class WeatherViewModel(
                 fetchWeatherCurrentLocation()
             } else {
                 getWeatherByCoordinates(
-                    selectedLocation.value.latitude, selectedLocation.value.longitude,
-                    false
+                    selectedLocation.value.latitude, selectedLocation.value.longitude, false
                 )
             }
             observeSelectedCityState()
@@ -115,21 +113,17 @@ class WeatherViewModel(
                     WeatherRepository.getWeatherEntryCurrentLocation()
                 if (currentLocationEntry != null) { // If DB has data of current location
                     getWeatherByCoordinates(
-                        currentLocationEntry.latitude,
-                        currentLocationEntry.longitude,
-                        true
+                        currentLocationEntry.latitude, currentLocationEntry.longitude, true
                     )
                 } else { // No data for current location, so try to load another location
                     currentLocationEntry = WeatherRepository.getFirstNonCurrentLocationEntry()
                     if (currentLocationEntry != null) {
                         getWeatherByCoordinates(
-                            currentLocationEntry.latitude,
-                            currentLocationEntry.longitude, false
+                            currentLocationEntry.latitude, currentLocationEntry.longitude, false
                         )
                     } else {
                         _weatherState.value = WeatherApiState.Error(
-                            "No locations found. Please " +
-                                    "add manually a location to view the weather."
+                            "No locations found. Please " + "add manually a location to view the weather."
                         )
                     }
                 }
@@ -140,100 +134,107 @@ class WeatherViewModel(
     private fun observeSelectedCityState() {
         viewModelScope.launch {
             selectedLocationRepository.selectedLocationState.collect { newState ->
-                Log.d(TAG, "New selected location: $newState")
-                _selectedLocation.update { newState }
+                if(!selectedLocationRepository.isLocationStateEmpty()) {
+                    Log.d(TAG, "New selected location: $newState")
+                    _selectedLocation.update { newState }
+                    getWeatherByCoordinates(selectedLocation.value.latitude,
+                        selectedLocation.value.longitude, selectedLocation.value.currentLocation)
+                } else {
+                    _weatherState.value = WeatherApiState.Error(
+                        "No locations found. Please " + "add manually a location to view the weather."
+                    )
+                }
+
             }
         }
     }
 
     private fun getWeatherByCoordinates(
-        latitude: Double,
-        longitude: Double,
-        isCurrentLocation: Boolean
+        latitude: Double, longitude: Double, isCurrentLocation: Boolean
     ) {
         viewModelScope.launch {
             try {
                 _weatherState.value = WeatherApiState.Loading // Loading state
-                if (isOnline(context)) { // Does the app have internet connection ?
-                    // Weather api call to OpenWeather
+                if (isOnline(context)) {
+                    // Weather API call to OpenWeather
                     val response = RetroApi.weatherService.getWeatherByCoordinates(
-                        latitude,
-                        longitude,
-                        units,
-                        apiKey
+                        latitude, longitude, units, apiKey
                     )
-                    // Run db operations
+
+                    // Run DB operations
                     withContext(Dispatchers.IO) {
-                        // Check if the fetched location already exists on db
-                        var existingWeatherEntryId = WeatherRepository.getWeatherEntry(
-                            response.coord.lat,
-                            response.coord.lon
-                        )?.id ?: 0
-                        if (isCurrentLocation) {
-                            existingWeatherEntryId =
-                                WeatherRepository.getWeatherEntryCurrentLocation()?.id ?: 0
-                        }
-                        // Convert response to DTO
-                        val weatherEntry = convertWeatherResponseToWeatherEntry(
-                            response,
-                            existingWeatherEntryId,
-                            isCurrentLocation
+                        val existingWeatherEntryId = getExistingWeatherEntryId(
+                            response.coord.lat, response.coord.lon, isCurrentLocation
                         )
-                        // If entry exists, update it if not insert it
+                        val weatherEntry = convertWeatherResponseToWeatherEntry(
+                            response, existingWeatherEntryId, isCurrentLocation
+                        )
+
+                        // If entry exists, update it, if not, insert it
                         if (existingWeatherEntryId != 0) {
                             WeatherRepository.updateWeatherEntry(weatherEntry)
                         } else {
                             WeatherRepository.insertWeatherEntry(weatherEntry)
                         }
-                        selectedLocationRepository.editSelectLocation(
-                            SelectedLocationState(
-                                weatherEntry.locationName,
-                                weatherEntry.country,
-                                weatherEntry.longitude,
-                                weatherEntry.latitude,
-                                isCurrentLocation
-                            )
-                        )
+
+                        Log.d(TAG, "Weather : $weatherEntry")
+
+                        updateSelectedLocation(weatherEntry, isCurrentLocation)
                         _weatherState.value = WeatherApiState.Success(weatherEntry)
                     }
-                } else { // No internet connection
-                    // Load old data from DB
+                } else {
+                    // No internet connection, load old data from DB
                     Toast.makeText(context, "No internet connection", Toast.LENGTH_LONG).show()
-                    withContext(Dispatchers.IO) {
-                        val localWeatherEntry: WeatherEntry?
-                        if (isCurrentLocation) {
-                            localWeatherEntry = WeatherRepository.getWeatherEntryCurrentLocation()
-                        } else {
-                            localWeatherEntry = WeatherRepository.getWeatherEntry(
-                                selectedLocation.value.latitude,
-                                selectedLocation.value.longitude
-                            )
-                        }
-                        // Update selected location
-                        if (localWeatherEntry != null) {
-                            selectedLocationRepository.editSelectLocation(
-                                SelectedLocationState(
-                                    localWeatherEntry.locationName,
-                                    localWeatherEntry.country,
-                                    localWeatherEntry.longitude,
-                                    localWeatherEntry.latitude,
-                                    isCurrentLocation
-                                )
-                            )
-                            _weatherState.value = WeatherApiState.Success(localWeatherEntry)
-                        } else {
-                            _weatherState.value = WeatherApiState.Error(
-                                "No locations found. Please " +
-                                        "add manually a location to view the weather."
-                            )
-                        }
-                    }
+                    loadOldDataFromDB(isCurrentLocation)
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error fetching data: ${e.message}")
                 _weatherState.value = WeatherApiState.Error("Error fetching data: ${e.message}")
             }
         }
+
+    }
+
+    private suspend fun getExistingWeatherEntryId(
+        latitude: Double, longitude: Double, isCurrentLocation: Boolean
+    ): Int {
+        return WeatherRepository.getWeatherEntry(
+            latitude, longitude
+        )?.id ?: if (isCurrentLocation) WeatherRepository.getWeatherEntryCurrentLocation()?.id
+            ?: 0 else 0
+    }
+
+    private suspend fun loadOldDataFromDB(isCurrentLocation: Boolean) {
+        withContext(Dispatchers.IO) {
+            val localWeatherEntry: WeatherEntry? = if (isCurrentLocation) {
+                WeatherRepository.getWeatherEntryCurrentLocation()
+            } else {
+                WeatherRepository.getWeatherEntry(
+                    selectedLocation.value.latitude, selectedLocation.value.longitude
+                )
+            }
+
+            if (localWeatherEntry != null) {
+                updateSelectedLocation(localWeatherEntry, isCurrentLocation)
+                _weatherState.value = WeatherApiState.Success(localWeatherEntry)
+            } else {
+                _weatherState.value = WeatherApiState.Error(
+                    "No locations found. Please " + "add manually a location to view the weather."
+                )
+            }
+        }
+    }
+
+    private fun updateSelectedLocation(weatherEntry: WeatherEntry, isCurrentLocation: Boolean) {
+        selectedLocationRepository.editSelectLocation(
+            SelectedLocationState(
+                weatherEntry.locationName,
+                weatherEntry.country,
+                weatherEntry.longitude,
+                weatherEntry.latitude,
+                isCurrentLocation
+            )
+        )
     }
 
     private fun convertCurrentDateToFormattedDate(): String {
@@ -249,9 +250,7 @@ class WeatherViewModel(
     }
 
     private fun convertWeatherResponseToWeatherEntry(
-        weatherResponse: WeatherResponse,
-        id: Int,
-        isCurrentLocation: Boolean
+        weatherResponse: WeatherResponse, id: Int, isCurrentLocation: Boolean
     ): WeatherEntry {
         return WeatherEntry(
             id = id,
@@ -281,7 +280,8 @@ class WeatherViewModel(
                 fetchWeatherCurrentLocation()
             } else {
                 getWeatherByCoordinates(
-                    selectedLocation.value.latitude, selectedLocation.value.longitude,
+                    selectedLocation.value.latitude,
+                    selectedLocation.value.longitude,
                     selectedLocation.value.currentLocation
                 )
             }

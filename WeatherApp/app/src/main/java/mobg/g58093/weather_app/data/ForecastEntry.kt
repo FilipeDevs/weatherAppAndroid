@@ -27,9 +27,7 @@ data class ForecastEntry(
 
     val date: String,
 
-    var tempMax: Int,
-
-    var tempMin: Int,
+    var temp: Int,
 
     val humidity: Int,
 
