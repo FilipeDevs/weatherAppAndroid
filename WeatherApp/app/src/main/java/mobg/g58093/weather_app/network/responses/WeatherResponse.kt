@@ -12,6 +12,7 @@ data class WeatherResponse(
     val wind: WindInfo,
     val visibility: Int,
     val name: String,
+    val timezone : Int
 )
 
 

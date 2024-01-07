@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import mobg.g58093.weather_app.util.AppViewModelProvider
 import mobg.g58093.weather_app.network.responses.LocationWeatherResponse
+import mobg.g58093.weather_app.util.getCountryFromCode
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,7 +76,7 @@ fun SearchScreen(
         when(val currentState = searchState) {
             is SearchApiState.Loading -> {
                 Text("Searching...",
-                    textAlign = TextAlign.Left,
+                    textAlign = TextAlign.Center,
                     style = TextStyle(color = Color.Gray))
             }
             is SearchApiState.Success -> {
@@ -111,7 +112,7 @@ fun LocationsListResult(
                         .fillMaxWidth()
                         .padding(16.dp),
                     text = "No locations found...",
-                    textAlign = TextAlign.Left,
+                    textAlign = TextAlign.Center,
                     style = TextStyle(color = Color.Gray)
                 )
             }
@@ -129,7 +130,7 @@ fun LocationsListResult(
                 ) {
                     Text(
                         textAlign = TextAlign.Left,
-                        text = "${item.name} - ${item.state} - ${item.country}"
+                        text = "${item.name}, ${item.state}, ${getCountryFromCode(item.country)}"
                     )
                 }
             }

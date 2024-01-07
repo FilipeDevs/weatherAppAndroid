@@ -6,7 +6,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -32,10 +35,11 @@ fun DetailsScreen(
     val weatherState by weatherViewModel.weatherState.collectAsState()
 
     Column(
-        modifier = Modifier
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.Center, // Center vertically
-        horizontalAlignment = Alignment.CenterHorizontally // Center horizontally
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         when (val currentState = weatherState) {
             is WeatherApiState.Loading -> {
@@ -57,8 +61,7 @@ fun DetailsScreen(
                     style = TextStyle(
                         fontSize = 15.sp,
                         fontWeight = FontWeight(400),
-                        color = Color(0xFF616161),
-
+                        color = MaterialTheme.colorScheme.tertiary
                         )
                 )
                 Text(
@@ -66,9 +69,7 @@ fun DetailsScreen(
                     style = TextStyle(
                         fontSize = 20.sp,
                         fontWeight = FontWeight(400),
-                        color = Color(0xFFFFFFFF),
-
-                        )
+                        color = MaterialTheme.colorScheme.secondary)
                 )
                 Spacer(modifier = Modifier.height(20.dp))
                 Text(
@@ -76,18 +77,15 @@ fun DetailsScreen(
                     style = TextStyle(
                         fontSize = 15.sp,
                         fontWeight = FontWeight(400),
-                        color = Color(0xFF616161),
-
-                        )
+                        color = MaterialTheme.colorScheme.tertiary)
                 )
                 Text(
                     text = currentState.data.humidity.toString() + "%",
                     style = TextStyle(
                         fontSize = 20.sp,
                         fontWeight = FontWeight(400),
-                        color = Color(0xFFFFFFFF),
-
-                        )
+                        color = MaterialTheme.colorScheme.secondary
+                    )
                 )
                 Spacer(modifier = Modifier.height(20.dp))
                 Text(
@@ -95,16 +93,14 @@ fun DetailsScreen(
                     style = TextStyle(
                         fontSize = 15.sp,
                         fontWeight = FontWeight(400),
-                        color = Color(0xFF616161),
-
-                        )
+                        color = MaterialTheme.colorScheme.tertiary)
                 )
                 Text(
-                    text = currentState.data.visibility.toString(),
+                    text = currentState.data.visibility.toString() + "m",
                     style = TextStyle(
                         fontSize = 20.sp,
                         fontWeight = FontWeight(400),
-                        color = Color(0xFFFFFFFF),
+                        color = MaterialTheme.colorScheme.secondary
                     )
                 )
                 Spacer(modifier = Modifier.height(20.dp))
@@ -113,25 +109,28 @@ fun DetailsScreen(
                     style = TextStyle(
                         fontSize = 15.sp,
                         fontWeight = FontWeight(400),
-                        color = Color(0xFF616161),
-
-                        )
+                        color = MaterialTheme.colorScheme.tertiary)
                 )
                 Text(
                     text = currentState.data.pressure.toString() + " hPa",
                     style = TextStyle(
                         fontSize = 20.sp,
                         fontWeight = FontWeight(400),
-                        color = Color(0xFFFFFFFF),
-
-                        )
+                        color = MaterialTheme.colorScheme.secondary)
                 )
                 Spacer(modifier = Modifier.height(50.dp))
                 Button(
                     onClick = navigateToForecast,
                     modifier = Modifier.padding(8.dp)
                 ) {
-                    Text(text = "Forecast")
+                    Text(
+                        text = "Forecast",
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight(400),
+                            color = MaterialTheme.colorScheme.tertiary,
+                        )
+                    )
                 }
             }
 

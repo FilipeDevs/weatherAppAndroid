@@ -15,8 +15,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
@@ -44,6 +47,7 @@ import kotlinx.coroutines.launch
 import mobg.g58093.weather_app.R
 import mobg.g58093.weather_app.util.SelectedLocationState
 import mobg.g58093.weather_app.util.checkIsGPSEnabled
+import mobg.g58093.weather_app.util.getCountryFromCode
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -113,8 +117,9 @@ fun HomeScreen(
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -124,14 +129,13 @@ fun HomeScreen(
             }
 
             is WeatherApiState.Success -> {
-                Spacer(modifier = Modifier.height(20.dp))
                 Text(
                     text = currentState.data.locationName
-                            + " - " + currentState.data.country,
+                            + " - " +  getCountryFromCode(currentState.data.country),
                     style = TextStyle(
                         fontSize = 20.sp,
                         fontWeight = FontWeight(400),
-                        color = Color(0xFF616161)
+                        color = MaterialTheme.colorScheme.tertiary
                     )
                 )
                 Spacer(modifier = Modifier.height(5.dp))
@@ -141,7 +145,7 @@ fun HomeScreen(
                     style = TextStyle(
                         fontSize = 18.sp,
                         fontWeight = FontWeight(400),
-                        color = Color(0xFF616161)
+                        color = MaterialTheme.colorScheme.tertiary
                     )
                 )
                 // Current temperature
@@ -150,13 +154,12 @@ fun HomeScreen(
                     style = TextStyle(
                         fontSize = 80.sp,
                         fontWeight = FontWeight(400),
-                        color = Color(0xFFFFFFFF),
+                        color = MaterialTheme.colorScheme.secondary
                     )
                 )
                 Spacer(modifier = Modifier.height(5.dp))
                 // Highest and Lowest Temperatures
-                Row(
-                ) {
+                Row{
                     Column {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Image(
@@ -173,7 +176,7 @@ fun HomeScreen(
                                 style = TextStyle(
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight(400),
-                                    color = Color(0xFF616161),
+                                    color = MaterialTheme.colorScheme.tertiary
                                 )
                             )
                         }
@@ -196,7 +199,7 @@ fun HomeScreen(
                                 style = TextStyle(
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight(400),
-                                    color = Color(0xFF616161),
+                                    color = MaterialTheme.colorScheme.tertiary
                                 )
                             )
                         }
@@ -218,7 +221,7 @@ fun HomeScreen(
                     style = TextStyle(
                         fontSize = 18.sp,
                         fontWeight = FontWeight(400),
-                        color = Color(0xFF616161),
+                        color = MaterialTheme.colorScheme.tertiary
                     )
                 )
                 Spacer(modifier = Modifier.height(15.dp))
@@ -241,7 +244,7 @@ fun HomeScreen(
                                 style = TextStyle(
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight(400),
-                                    color = Color(0xFF616161),
+                                    color = MaterialTheme.colorScheme.tertiary
                                 )
                             )
                         }
@@ -264,7 +267,7 @@ fun HomeScreen(
                                 style = TextStyle(
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight(400),
-                                    color = Color(0xFF616161),
+                                    color = MaterialTheme.colorScheme.tertiary
                                 )
                             )
                         }
@@ -281,7 +284,7 @@ fun HomeScreen(
                         style = TextStyle(
                             fontSize = 18.sp,
                             fontWeight = FontWeight(400),
-                            color = Color(0xFF616161),
+                            color = MaterialTheme.colorScheme.tertiary
                         )
                     )
                 }
@@ -295,7 +298,7 @@ fun HomeScreen(
                         style = TextStyle(
                             fontSize = 18.sp,
                             fontWeight = FontWeight(400),
-                            color = Color(0xFF616161),
+                            color = MaterialTheme.colorScheme.tertiary
                         )
                     )
                     Spacer(modifier = Modifier.width(5.dp))

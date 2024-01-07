@@ -5,19 +5,25 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val Black = Color(0xFF000000) // Black
-private val White = Color(0xFFFFFFFF) // White
-private val Grey = Color(0xFF616161) // #616161
+
 
 private val ColorScheme = darkColorScheme(
     primary = Black,
     secondary = White,
-    tertiary = Grey
+    tertiary = Grey,
+    onPrimary = Black,
+    primaryContainer = Black,
+    onPrimaryContainer = Black,
+    onSecondary = White,
+    secondaryContainer = White,
+    onSecondaryContainer = White,
+    onTertiary = Grey,
+    tertiaryContainer = Grey,
+    onTertiaryContainer = Grey,
 )
 
 @Composable

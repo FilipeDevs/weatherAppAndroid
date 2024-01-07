@@ -135,7 +135,7 @@ fun WeatherApp() {
                 SearchScreen(modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
-                    navigateToLocations = {navController.navigate(WeatherAppScreen.Locations.name)})
+                    navigateToLocations = {navController.navigateUp()})
             }
         }
     }

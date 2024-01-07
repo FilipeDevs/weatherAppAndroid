@@ -25,6 +25,7 @@ import mobg.g58093.weather_app.network.isOnline
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 
 sealed class WeatherApiState {
@@ -134,11 +135,13 @@ class WeatherViewModel(
     private fun observeSelectedCityState() {
         viewModelScope.launch {
             selectedLocationRepository.selectedLocationState.collect { newState ->
-                if(!selectedLocationRepository.isLocationStateEmpty()) {
+                if (!selectedLocationRepository.isLocationStateEmpty()) {
                     Log.d(TAG, "New selected location: $newState")
                     _selectedLocation.update { newState }
-                    getWeatherByCoordinates(selectedLocation.value.latitude,
-                        selectedLocation.value.longitude, selectedLocation.value.currentLocation)
+                    getWeatherByCoordinates(
+                        selectedLocation.value.latitude,
+                        selectedLocation.value.longitude, selectedLocation.value.currentLocation
+                    )
                 } else {
                     _weatherState.value = WeatherApiState.Error(
                         "No locations found. Please " + "add manually a location to view the weather."
@@ -243,10 +246,15 @@ class WeatherViewModel(
         return sdf.format(date)
     }
 
-    private fun convertUnixTimestampToHourAndMinutes(unixTimestamp: Long): String {
+    private fun convertUnixTimestampToHourAndMinutes(unixTimestamp: Long, timeZoneOffsetSeconds: Int): String {
         val date = Date(unixTimestamp * 1000L)
-        val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
-        return sdf.format(date)
+        val adjustedTime = date.time + timeZoneOffsetSeconds * 1000L
+        val adjustedDate = Date(adjustedTime)
+        val sdf = SimpleDateFormat("HH:mm")
+
+        sdf.timeZone = TimeZone.getTimeZone("GMT")
+
+        return sdf.format(adjustedDate)
     }
 
     private fun convertWeatherResponseToWeatherEntry(
@@ -263,8 +271,14 @@ class WeatherViewModel(
             lowTemp = weatherResponse.main.temp_min.toInt(),
             weatherType = weatherResponse.weather[0].description,
             weatherIcon = weatherResponse.weather[0].icon,
-            sunriseHour = convertUnixTimestampToHourAndMinutes(weatherResponse.sys.sunrise),
-            sunsetHour = convertUnixTimestampToHourAndMinutes(weatherResponse.sys.sunset),
+            sunriseHour = convertUnixTimestampToHourAndMinutes(
+                weatherResponse.sys.sunrise,
+                weatherResponse.timezone
+            ),
+            sunsetHour = convertUnixTimestampToHourAndMinutes(
+                weatherResponse.sys.sunset,
+                weatherResponse.timezone
+            ),
             wind = weatherResponse.wind.speed,
             humidity = weatherResponse.main.humidity,
             visibility = weatherResponse.visibility,
