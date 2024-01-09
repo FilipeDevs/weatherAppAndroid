@@ -5,4 +5,7 @@
     <string name="forecast">Forecast</string>
     <string name="locations">Favorites</string>
     <string name="search">Search</string>
+    <string name="appwidget_text">Weather Widget</string>
+    <string name="add_widget">Add widget</string>
+    <string name="app_widget_description">Weather Widget</string>
 </resources>
