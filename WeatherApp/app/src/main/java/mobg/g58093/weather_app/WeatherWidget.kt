@@ -90,16 +90,16 @@ internal fun updateAppWidget(
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        views.setOnClickPendingIntent(R.id.updateButton, pendingUpdateIntent)
+        views.setOnClickPendingIntent(R.id.reload, pendingUpdateIntent)
 
         response?.let {
-            views.setTextViewText(R.id.textView, it.name)
-            views.setTextViewText(R.id.textView2, "${it.main.temp}°C")
+            views.setTextViewText(R.id.location, it.name)
+            views.setTextViewText(R.id.temp, "${it.main.temp.toInt()}°C")
 
             // Load the image using Picasso
             try {
                 val bitmap = Picasso.get().load("https://openweathermap.org/img/wn/${it.weather[0].icon}@2x.png").get()
-                views.setImageViewBitmap(R.id.imageView, bitmap)
+                views.setImageViewBitmap(R.id.weather, bitmap)
             } catch (e: Exception) {
                 e.printStackTrace()
             }

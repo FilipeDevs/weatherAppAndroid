@@ -10,6 +10,6 @@
     android:widgetCategory="home_screen"
     android:previewLayout="@layout/weather_widget"
     android:targetCellHeight="1"
-       android:targetCellWidth="2"
+       android:targetCellWidth="1"
     android:initialKeyguardLayout="@layout/weather_widget"
 />
