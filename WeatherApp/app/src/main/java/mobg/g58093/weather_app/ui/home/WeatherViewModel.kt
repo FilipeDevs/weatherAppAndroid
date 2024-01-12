@@ -51,16 +51,17 @@ class WeatherViewModel(
     private val _selectedLocation = MutableStateFlow(SelectedLocationState())
     val selectedLocation: StateFlow<SelectedLocationState> = _selectedLocation
 
-    // Permissions and GPS
+    // Permissions
     private val _locationPermission = MutableStateFlow(true)
     val locationPermission: StateFlow<Boolean> = _locationPermission
 
+    // GPS
     private val _gpsStatus = MutableStateFlow(true)
     val gpsStatus: StateFlow<Boolean> = _gpsStatus
 
-    // Flag
-    private val _firstLaunch = MutableStateFlow(false)
-    val firstLaunch: StateFlow<Boolean> = _firstLaunch
+    // Flag of permissions request (only happens on launch)
+    private val _firstLaunchPerms = MutableStateFlow(false)
+    val firstLaunchPerms: StateFlow<Boolean> = _firstLaunchPerms
 
 
     init {
@@ -72,12 +73,12 @@ class WeatherViewModel(
                     selectedLocation.value.latitude, selectedLocation.value.longitude, false
                 )
             }
-            observeSelectedCityState()
+            observeSelectedCityState() // Listen to changes to selected location
         }
     }
 
-    fun updateFirstLaunch() {
-        _firstLaunch.update { true }
+    fun updateFirstLaunchPermissions() {
+        _firstLaunchPerms.update { true }
     }
 
     fun fetchWeatherCurrentLocation() {
@@ -124,7 +125,7 @@ class WeatherViewModel(
                         )
                     } else {
                         _weatherState.value = WeatherApiState.Error(
-                            "No locations found. Please " + "add manually a location to view the weather."
+                            "No locations found. Please add manually a location to view the weather."
                         )
                     }
                 }
@@ -132,24 +133,22 @@ class WeatherViewModel(
         }
     }
 
-    private fun observeSelectedCityState() {
-        viewModelScope.launch {
-            selectedLocationRepository.selectedLocationState.collect { newState ->
-                if (!selectedLocationRepository.isLocationStateEmpty()) {
-                    Log.d(TAG, "New selected location: $newState")
-                    _selectedLocation.update { newState }
-                    getWeatherByCoordinates(
-                        selectedLocation.value.latitude,
-                        selectedLocation.value.longitude, selectedLocation.value.currentLocation
-                    )
-                } else {
-                    _weatherState.value = WeatherApiState.Error(
-                        "No locations found. Please " + "add manually a location to view the weather."
-                    )
-                }
-
+    private suspend fun observeSelectedCityState() {
+        selectedLocationRepository.selectedLocationState.collect { newState ->
+            if (!selectedLocationRepository.isLocationStateEmpty()) {
+                _selectedLocation.update { newState }
+                getWeatherByCoordinates(
+                    selectedLocation.value.latitude,
+                    selectedLocation.value.longitude, selectedLocation.value.currentLocation
+                )
+            } else {
+                _weatherState.value = WeatherApiState.Error(
+                    "No locations found. Please add manually a location to view the weather."
+                )
             }
+
         }
+
     }
 
     private fun getWeatherByCoordinates(
@@ -180,8 +179,6 @@ class WeatherViewModel(
                             WeatherRepository.insertWeatherEntry(weatherEntry)
                         }
 
-                        Log.d(TAG, "Weather : $weatherEntry")
-
                         updateSelectedLocation(weatherEntry, isCurrentLocation)
                         _weatherState.value = WeatherApiState.Success(weatherEntry)
                     }
@@ -191,7 +188,6 @@ class WeatherViewModel(
                     loadOldDataFromDB(isCurrentLocation)
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Error fetching data: ${e.message}")
                 _weatherState.value = WeatherApiState.Error("Error fetching data: ${e.message}")
             }
         }
@@ -246,7 +242,10 @@ class WeatherViewModel(
         return sdf.format(date)
     }
 
-    private fun convertUnixTimestampToHourAndMinutes(unixTimestamp: Long, timeZoneOffsetSeconds: Int): String {
+    private fun convertUnixTimestampToHourAndMinutes(
+        unixTimestamp: Long,
+        timeZoneOffsetSeconds: Int
+    ): String {
         val date = Date(unixTimestamp * 1000L)
         val adjustedTime = date.time + timeZoneOffsetSeconds * 1000L
         val adjustedDate = Date(adjustedTime)

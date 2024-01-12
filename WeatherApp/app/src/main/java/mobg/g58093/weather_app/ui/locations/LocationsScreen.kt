@@ -103,7 +103,6 @@ fun LocationList(
 ) {
     LazyColumn(modifier = modifier) {
         items(items = locationsList, key = { it.id }) { item ->
-            Spacer(modifier = Modifier.width(5.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = modifier,

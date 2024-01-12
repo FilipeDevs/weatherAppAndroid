@@ -8,4 +8,15 @@
     <string name="appwidget_text">Weather Widget</string>
     <string name="add_widget">Add widget</string>
     <string name="app_widget_description">Weather Widget</string>
+    <string name="loading">Loading…</string>
+    <string name="wind">Wind</string>
+    <string name="pressure">Pressure</string>
+    <string name="visibility">Visibility</string>
+    <string name="humidity">Humidity</string>
+    <string name="lastUpdated">Last updated : </string>
+    <string name="refresh">Refresh</string>
+    <string name="locationRequired">Location Permission Required</string>
+    <string name="rationaleLocation">The app requires access to your location for a better experience.</string>
+    <string name="settings">Go to Settings</string>
+    <string name="dismiss">Dismiss</string>
 </resources>

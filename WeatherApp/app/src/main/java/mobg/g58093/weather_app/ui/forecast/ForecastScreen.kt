@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,21 +42,21 @@ fun ForecastScreen(
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .fillMaxSize(),
     ) {
         Spacer(modifier = Modifier.height(10.dp))
         when (val currentState = forecastState) {
             is ForecastApiState.Loading -> {
-                Text("Loading...")
+                Text(text = stringResource(R.string.loading))
             }
+
             is ForecastApiState.Success -> {
                 ForecastList(
                     forecastList = currentState.data,
                     modifier = modifier
                 )
             }
+
             else -> { // Error
                 Text((forecastState as ForecastApiState.Error).message)
             }
@@ -69,10 +70,9 @@ private fun ForecastList(forecastList: List<ForecastEntry>, modifier: Modifier) 
         items(items = forecastList, key = { it.id }) { item ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                modifier = modifier.padding(horizontal = 20.dp)
             ) {
+                // Date
                 Text(
                     text = item.date,
                     style = TextStyle(
@@ -81,21 +81,22 @@ private fun ForecastList(forecastList: List<ForecastEntry>, modifier: Modifier) 
                         color = MaterialTheme.colorScheme.secondary,
                     )
                 )
-                Spacer(modifier = Modifier.width(40.dp))
+                Spacer(modifier = Modifier.weight(1f))
                 Image(
                     painter = painterResource(id = R.drawable.water),
                     contentDescription = "water icon"
                 )
-                Spacer(modifier = Modifier.width(3.dp))
+                Spacer(modifier = Modifier.weight(1f))
+                // Humidity
                 Text(
-                    text = item.humidity.toString() + "%",
+                    text = "${item.humidity}%",
                     style = TextStyle(
                         fontSize = 16.sp,
                         fontWeight = FontWeight(400),
                         color = MaterialTheme.colorScheme.tertiary,
                     )
                 )
-                Spacer(modifier = Modifier.width(40.dp))
+                Spacer(modifier = Modifier.weight(1f))
                 // Weather Icon
                 AsyncImage(
                     modifier = Modifier
@@ -103,11 +104,12 @@ private fun ForecastList(forecastList: List<ForecastEntry>, modifier: Modifier) 
                         .height(50.dp),
                     model = "https://openweathermap.org/img/wn/${item.icon}@2x.png",
                     placeholder = painterResource(id = R.drawable.deviconweather),
-                    contentDescription = "The delasign logo",
+                    contentDescription = "Weather icon",
                 )
-                Spacer(modifier = Modifier.width(15.dp))
+                Spacer(modifier = Modifier.weight(1f))
+                // Forecast temperature
                 Text(
-                    text = item.temp.toString() + "°",
+                    text = "${item.temp}°C",
                     style = TextStyle(
                         fontSize = 16.sp,
                         fontWeight = FontWeight(400),
@@ -118,15 +120,6 @@ private fun ForecastList(forecastList: List<ForecastEntry>, modifier: Modifier) 
         }
     }
 }
-
-@Preview(showBackground = true)
-@Composable
-fun ForecastScreenPreview() {
-    Weather_appTheme {
-        ForecastScreen(modifier = Modifier)
-    }
-}
-
 
 
 

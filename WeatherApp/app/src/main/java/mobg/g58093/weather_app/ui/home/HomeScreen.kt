@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -68,11 +69,11 @@ fun HomeScreen(
     val permissionState by weatherViewModel.locationPermission.collectAsState() // Permissions state
     val gpsState by weatherViewModel.gpsStatus.collectAsState() // Gps
 
-    val firstLaunch by weatherViewModel.firstLaunch.collectAsState() // Has the VM initialized
+    val firstLaunch by weatherViewModel.firstLaunchPerms.collectAsState() // Has the VM initialized
 
     var showRationalte by remember { mutableStateOf(false) } // rationale state
 
-    // Create a permission launcher
+    // Permission launcher
     val requestPermissionLauncher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission(),
@@ -81,7 +82,7 @@ fun HomeScreen(
                     weatherViewModel.updatePermissions(true)
                     // permissions granted so fetch current location
                     weatherViewModel.fetchWeatherCurrentLocation()
-                    weatherViewModel.updateFirstLaunch()
+                    weatherViewModel.updateFirstLaunchPermissions()
                 } else {
                     weatherViewModel.updatePermissions(false)
                     showRationalte = true
@@ -98,6 +99,7 @@ fun HomeScreen(
                 duration = SnackbarDuration.Short
             )
             when (result) {
+                // Redirect user to location settings
                 SnackbarResult.ActionPerformed -> {
                     val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                     context.startActivity(intent)
@@ -125,13 +127,13 @@ fun HomeScreen(
     ) {
         when (val currentState = weatherState) {
             is WeatherApiState.Loading -> {
-                Text("Loading...")
+                Text(text = stringResource(R.string.loading))
             }
 
             is WeatherApiState.Success -> {
+                // Location Name
                 Text(
-                    text = currentState.data.locationName
-                            + " - " +  getCountryFromCode(currentState.data.country),
+                    text = "${currentState.data.locationName} - ${getCountryFromCode(currentState.data.country)}",
                     style = TextStyle(
                         fontSize = 20.sp,
                         fontWeight = FontWeight(400),
@@ -150,7 +152,7 @@ fun HomeScreen(
                 )
                 // Current temperature
                 Text(
-                    text = currentState.data.mainTemp.toString() + "°C",
+                    text = "${currentState.data.mainTemp}°C",
                     style = TextStyle(
                         fontSize = 80.sp,
                         fontWeight = FontWeight(400),
@@ -159,7 +161,7 @@ fun HomeScreen(
                 )
                 Spacer(modifier = Modifier.height(5.dp))
                 // Highest and Lowest Temperatures
-                Row{
+                Row {
                     Column {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Image(
@@ -167,12 +169,12 @@ fun HomeScreen(
                                     .width(12.dp)
                                     .height(17.dp),
                                 painter = painterResource(id = R.drawable.downarrow),
-                                contentDescription = "image description",
+                                contentDescription = "low temp",
                                 contentScale = ContentScale.None
                             )
                             Spacer(modifier = Modifier.width(2.dp))
                             Text(
-                                text = currentState.data.lowTemp.toString() + "°C",
+                                text = "${currentState.data.lowTemp}°C",
                                 style = TextStyle(
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight(400),
@@ -190,12 +192,12 @@ fun HomeScreen(
                                     .width(12.dp)
                                     .height(17.dp),
                                 painter = painterResource(id = R.drawable.uparrow),
-                                contentDescription = "image description",
+                                contentDescription = "high temp",
                                 contentScale = ContentScale.None
                             )
                             Spacer(modifier = Modifier.width(2.dp))
                             Text(
-                                text = currentState.data.highTemp.toString() + "°C",
+                                text = "${currentState.data.highTemp}°C",
                                 style = TextStyle(
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight(400),
@@ -213,7 +215,7 @@ fun HomeScreen(
                         .height(180.dp),
                     model = "https://openweathermap.org/img/wn/${(weatherState as WeatherApiState.Success).data.weatherIcon}@2x.png",
                     placeholder = painterResource(id = R.drawable.deviconweather),
-                    contentDescription = "The delasign logo",
+                    contentDescription = "weather icon",
                 )
 
                 Text(
@@ -226,8 +228,7 @@ fun HomeScreen(
                 )
                 Spacer(modifier = Modifier.height(15.dp))
                 // Sunrise and Sunset
-                Row(
-                ) {
+                Row {
                     Column {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Image(
@@ -235,7 +236,7 @@ fun HomeScreen(
                                     .width(19.dp)
                                     .height(17.dp),
                                 painter = painterResource(id = R.drawable.sunrisevector),
-                                contentDescription = "image description",
+                                contentDescription = "sunrise icon",
                                 contentScale = ContentScale.None
                             )
                             Spacer(modifier = Modifier.width(2.dp))
@@ -275,12 +276,13 @@ fun HomeScreen(
                     }
                 }
                 Spacer(modifier = Modifier.height(20.dp))
+                // Navigate to Weather details
                 Button(
                     onClick = navigateToDetails,
                     modifier = Modifier.padding(8.dp)
                 ) {
                     Text(
-                        text = "Details",
+                        text = stringResource(R.string.details),
                         style = TextStyle(
                             fontSize = 18.sp,
                             fontWeight = FontWeight(400),
@@ -290,11 +292,12 @@ fun HomeScreen(
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
+                // Status of data
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(
-                        text = "Last updated : " + currentState.data.date,
+                    Text( // When was the current weather being presented updated
+                        text = stringResource(R.string.lastUpdated) + currentState.data.date,
                         style = TextStyle(
                             fontSize = 18.sp,
                             fontWeight = FontWeight(400),
@@ -302,6 +305,7 @@ fun HomeScreen(
                         )
                     )
                     Spacer(modifier = Modifier.width(5.dp))
+                    // Refresh weather data
                     Button(
                         onClick = {
                             weatherViewModel.refreshData()
@@ -311,7 +315,7 @@ fun HomeScreen(
 
                     ) {
                         Text(
-                            text = "Refresh",
+                            text = stringResource(R.string.refresh),
                             color = Color.White
                         )
                     }
@@ -361,13 +365,13 @@ fun ShowLocationPermissionPopup(context: Context, weatherViewModel: WeatherViewM
     if (isDialogVisible) {
         AlertDialog(
             onDismissRequest = {
-                weatherViewModel.updateFirstLaunch()
+                weatherViewModel.updateFirstLaunchPermissions()
                 isDialogVisible = false
             },
-            title = { Text("Location Permission Required") },
+            title = { Text(text = stringResource(R.string.locationRequired)) },
             text = {
                 Column {
-                    Text("The app requires access to your location for a better experience.")
+                    Text(text = stringResource(R.string.rationaleLocation))
                     Spacer(modifier = Modifier.height(8.dp))
                 }
             },
@@ -378,19 +382,29 @@ fun ShowLocationPermissionPopup(context: Context, weatherViewModel: WeatherViewM
                         val uri: Uri = Uri.fromParts("package", context.packageName, null)
                         intent.data = uri
                         context.startActivity(intent)
-                        weatherViewModel.updateFirstLaunch()
+                        weatherViewModel.updateFirstLaunchPermissions()
                         isDialogVisible = false
                     }
                 ) {
-                    Text("Go to Settings")
+                    Text(
+                        text = stringResource(R.string.settings), style = TextStyle(
+                            fontWeight = FontWeight(400),
+                            color = MaterialTheme.colorScheme.secondary,
+                        )
+                    )
                 }
             },
             dismissButton = {
                 Button(onClick = {
-                    weatherViewModel.updateFirstLaunch()
+                    weatherViewModel.updateFirstLaunchPermissions()
                     isDialogVisible = false
                 }) {
-                    Text("Dismiss")
+                    Text(
+                        text = stringResource(R.string.dismiss), style = TextStyle(
+                            fontWeight = FontWeight(400),
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    )
                 }
             }
         )

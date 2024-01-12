@@ -16,10 +16,11 @@ import mobg.g58093.weather_app.data.WeatherEntry
 import mobg.g58093.weather_app.data.WeatherRepository
 
 data class Locations(
-    val locationsList : List<WeatherEntry> = listOf()
+    val locationsList: List<WeatherEntry> = listOf()
 )
 
-class LocationsViewModel(private val selectedLocationRepository: SelectedLocationRepository) : ViewModel() {
+class LocationsViewModel(private val selectedLocationRepository: SelectedLocationRepository) :
+    ViewModel() {
 
     private val _locationsState = MutableStateFlow<Locations>(Locations())
     val locationsState: StateFlow<Locations> = _locationsState.asStateFlow()
@@ -40,7 +41,7 @@ class LocationsViewModel(private val selectedLocationRepository: SelectedLocatio
     fun getAllUserLocations() {
         viewModelScope.launch {
             val weatherList = WeatherRepository.getAllWeatherEntries()
-            _locationsState.update { currentState -> currentState.copy(locationsList =  weatherList) }
+            _locationsState.update { currentState -> currentState.copy(locationsList = weatherList) }
         }
     }
 
@@ -53,19 +54,19 @@ class LocationsViewModel(private val selectedLocationRepository: SelectedLocatio
         }
     }
 
-    fun changeSelectedLocation(id : Int) {
+    fun changeSelectedLocation(id: Int) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 val weatherEntry = WeatherRepository.getWeatherEntry(id)
                 if (weatherEntry != null) {
                     selectedLocationRepository.editSelectLocation(
                         SelectedLocationState(
-                        locationName = weatherEntry.locationName,
-                        countryCode = weatherEntry.country,
-                        longitude = weatherEntry.longitude,
-                        latitude = weatherEntry.latitude,
-                        currentLocation = weatherEntry.currentLocation
-                    )
+                            locationName = weatherEntry.locationName,
+                            countryCode = weatherEntry.country,
+                            longitude = weatherEntry.longitude,
+                            latitude = weatherEntry.latitude,
+                            currentLocation = weatherEntry.currentLocation
+                        )
                     )
                 }
             }
@@ -76,7 +77,7 @@ class LocationsViewModel(private val selectedLocationRepository: SelectedLocatio
         withContext(Dispatchers.IO) {
             val weatherList = WeatherRepository.getAllWeatherEntries()
             if (weatherList.isNotEmpty()) {
-                val weatherEntry : WeatherEntry = weatherList[0]
+                val weatherEntry: WeatherEntry = weatherList[0]
                 selectedLocationRepository.editSelectLocation(
                     SelectedLocationState(
                         locationName = weatherEntry.locationName,
@@ -87,21 +88,22 @@ class LocationsViewModel(private val selectedLocationRepository: SelectedLocatio
                     )
                 )
             } else {
-                selectedLocationRepository.editSelectLocation(SelectedLocationState())
+                selectedLocationRepository.editSelectLocation(SelectedLocationState(isNull = true))
             }
         }
     }
 
-    fun deleteWeatherEntry(id : Int) {
+    fun deleteWeatherEntry(id: Int) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                val weatherEntry : WeatherEntry? = WeatherRepository.getWeatherEntry(id)
+                val weatherEntry: WeatherEntry? = WeatherRepository.getWeatherEntry(id)
 
                 // If selected location is the one being deleted, then select another location
                 if (weatherEntry != null) {
                     WeatherRepository.deleteWeatherEntry(weatherEntry)
-                    if(selectedLocation.value.latitude == weatherEntry.latitude &&
-                        selectedLocation.value.longitude == weatherEntry.longitude) {
+                    if (selectedLocation.value.latitude == weatherEntry.latitude &&
+                        selectedLocation.value.longitude == weatherEntry.longitude
+                    ) {
                         selectAnotherLocation()
                     }
 

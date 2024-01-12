@@ -10,6 +10,7 @@ data class SelectedLocationState(
     val longitude: Double = 0.0,
     val latitude: Double = 0.0,
     val currentLocation: Boolean = true,
+    val isNull : Boolean = false,
 )
 
 class SelectedLocationRepository {
@@ -22,9 +23,7 @@ class SelectedLocationRepository {
     }
 
     fun isLocationStateEmpty(): Boolean {
-        val defaultLocationState = SelectedLocationState()
-        val currentLocationState = _selectedLocationState.value
-        return currentLocationState == defaultLocationState
+        return _selectedLocationState.value.isNull
     }
 
 }

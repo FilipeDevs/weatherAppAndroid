@@ -7,11 +7,12 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationServices
 import android.Manifest
 import android.location.LocationManager
-import androidx.core.content.ContextCompat.getSystemService
-import androidx.core.content.getSystemService
+import android.os.Looper
+import android.util.Log
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 
-
-var TAG = "Location Manager"
 
 fun hasLocationPermission(context: Context): Boolean {
     return ContextCompat.checkSelfPermission(
@@ -23,18 +24,25 @@ fun hasLocationPermission(context: Context): Boolean {
 @SuppressLint("MissingPermission")
 fun getCurrentLocation(context: Context, callback: (Double, Double) -> Unit) {
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-    fusedLocationClient.lastLocation
-        .addOnSuccessListener { location ->
-            if (location != null) {
+
+    val locationRequest = LocationRequest.create()
+        .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+
+    val locationCallback = object : LocationCallback() {
+        override fun onLocationResult(locationResult: LocationResult) {
+            val location = locationResult.lastLocation
+            Log.d("getCurrentLocation", "$location")
+            if(location != null) {
                 val lat = location.latitude
                 val long = location.longitude
                 callback(lat, long)
+                fusedLocationClient.removeLocationUpdates(this)
             }
+
         }
-        .addOnFailureListener { exception ->
-            // Handle location retrieval failure
-            exception.printStackTrace()
-        }
+    }
+
+    fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
 }
 
 fun checkIsGPSEnabled(context: Context) : Boolean {
