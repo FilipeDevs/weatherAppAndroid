@@ -40,6 +40,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -49,6 +50,7 @@ import mobg.g58093.weather_app.R
 import mobg.g58093.weather_app.util.SelectedLocationState
 import mobg.g58093.weather_app.util.checkIsGPSEnabled
 import mobg.g58093.weather_app.util.getCountryFromCode
+import mobg.g58093.weather_app.util.getDynamicResourceId
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -133,13 +135,15 @@ fun HomeScreen(
             is WeatherApiState.Success -> {
                 // Location Name
                 Text(
-                    text = "${currentState.data.locationName} - ${getCountryFromCode(currentState.data.country)}",
+                    text = "${currentState.data.locationName} \n ${getCountryFromCode(currentState.data.country)}",
                     style = TextStyle(
                         fontSize = 20.sp,
                         fontWeight = FontWeight(400),
-                        color = MaterialTheme.colorScheme.tertiary
+                        color = MaterialTheme.colorScheme.tertiary,
+                        textAlign = TextAlign.Center
                     )
                 )
+
                 Spacer(modifier = Modifier.height(5.dp))
                 // Date
                 Text(
@@ -209,12 +213,11 @@ fun HomeScreen(
                     }
                 }
                 // Weather Icon
-                AsyncImage(
+                Image(
                     modifier = Modifier
                         .width(190.dp)
                         .height(180.dp),
-                    model = "https://openweathermap.org/img/wn/${(weatherState as WeatherApiState.Success).data.weatherIcon}@2x.png",
-                    placeholder = painterResource(id = R.drawable.deviconweather),
+                    painter = painterResource(id = getDynamicResourceId(currentState.data.weatherIcon)),
                     contentDescription = "weather icon",
                 )
 
@@ -325,7 +328,7 @@ fun HomeScreen(
             else -> {
                 // Show error state
                 val errorMessage = (weatherState as WeatherApiState.Error).message
-                Text("Error: $errorMessage")
+                Text(errorMessage)
             }
         }
 

@@ -13,7 +13,7 @@
     <string name="pressure">Pressure</string>
     <string name="visibility">Visibility</string>
     <string name="humidity">Humidity</string>
-    <string name="lastUpdated">Last updated : </string>
+    <string name="lastUpdated">Last updated: </string>
     <string name="refresh">Refresh</string>
     <string name="locationRequired">Location Permission Required</string>
     <string name="rationaleLocation">The app requires access to your location for a better experience.</string>

@@ -123,7 +123,7 @@ class WeatherViewModel(
                         getWeatherByCoordinates(
                             currentLocationEntry.latitude, currentLocationEntry.longitude, false
                         )
-                    } else {
+                    } else { // No locations on DB, user has to manually add one
                         _weatherState.value = WeatherApiState.Error(
                             "No locations found. Please add manually a location to view the weather."
                         )
