@@ -20,13 +20,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import mobg.g58093.weather_app.R
 import mobg.g58093.weather_app.ui.home.WeatherApiState
 import mobg.g58093.weather_app.ui.home.WeatherViewModel
-import mobg.g58093.weather_app.ui.theme.Weather_appTheme
 
 @Composable
 fun DetailsScreen(

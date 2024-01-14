@@ -21,4 +21,6 @@
     <string name="dismiss">Dismiss</string>
     <string name="searchPlaceholder">Search…</string>
     <string name="noLocations">No locations found…</string>
+    <string name="defaultCityWidget">Brussels</string>
+    <string name="defaultTempWidget">10°C</string>
 </resources>

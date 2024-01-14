@@ -1,6 +1,6 @@
 package mobg.g58093.weather_app.ui.locations
 
-import android.util.Log
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers

@@ -11,22 +11,19 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import mobg.g58093.weather_app.data.WeatherEntry
+import mobg.g58093.weather_app.data.WeatherRepository
+import mobg.g58093.weather_app.network.RetroApi
+import mobg.g58093.weather_app.network.isOnline
+import mobg.g58093.weather_app.network.responses.WeatherResponse
+import mobg.g58093.weather_app.util.LocationPermissionsAndGPSRepository
 import mobg.g58093.weather_app.util.PropertiesManager
 import mobg.g58093.weather_app.util.SelectedLocationRepository
 import mobg.g58093.weather_app.util.SelectedLocationState
-import mobg.g58093.weather_app.util.checkIsGPSEnabled
-import mobg.g58093.weather_app.data.WeatherEntry
-import mobg.g58093.weather_app.data.WeatherRepository
 import mobg.g58093.weather_app.util.getCurrentLocation
-import mobg.g58093.weather_app.util.hasLocationPermission
-import mobg.g58093.weather_app.network.RetroApi
-import mobg.g58093.weather_app.network.responses.WeatherResponse
-import mobg.g58093.weather_app.network.isOnline
-import mobg.g58093.weather_app.util.LocationPermissionsAndGPSRepository
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import java.util.TimeZone
 
 
 sealed class WeatherApiState {
@@ -71,7 +68,7 @@ class WeatherViewModel(
 
         }
         viewModelScope.launch {
-            observePermissionsState()
+            observePermissionsState() // Listen to changes to permissions
         }
         viewModelScope.launch {
             observeSelectedCityState() // Listen to changes to selected location
@@ -111,10 +108,13 @@ class WeatherViewModel(
     /**
      * Updates the location permission status.
      */
-    fun updatePermissions(perms: Boolean) {
+    fun updatePermissions() {
         LocationPermissionsAndGPSRepository.refreshChecks(context)
     }
 
+    /**
+     * Fetches the old weather data for the current location if GPS is not enabled or permission is not granted.
+     */
     private fun fetchOldCurrentLocation() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -147,7 +147,6 @@ class WeatherViewModel(
      */
     private suspend fun observeSelectedCityState() {
         SelectedLocationRepository.selectedLocationState.collect { newLocationState ->
-            Log.d("WeatherViewModel", "Listened to changes !")
             if (!SelectedLocationRepository.isLocationStateEmpty()) {
                 getWeatherByCoordinates(
                     newLocationState.latitude,
@@ -163,6 +162,9 @@ class WeatherViewModel(
         }
     }
 
+    /**
+     * Observes changes to the permissions state and fetches weather data for the current location if permissions are granted.
+     */
     private suspend fun observePermissionsState() {
         LocationPermissionsAndGPSRepository.permissions.collect { newPermissionsState ->
             Log.d(TAG, "Permissions changed : $newPermissionsState")
@@ -290,6 +292,9 @@ class WeatherViewModel(
         return sdf.format(adjustedDate)
     }
 
+    /**
+     * Converts a weather API response to a WeatherEntry object.
+     */
     private fun convertWeatherResponseToWeatherEntry(
         weatherResponse: WeatherResponse, id: Int, isCurrentLocation: Boolean
     ): WeatherEntry {

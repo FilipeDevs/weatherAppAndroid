@@ -2,7 +2,6 @@ package mobg.g58093.weather_app
 
 import android.app.Application
 import android.content.Context
-import mobg.g58093.weather_app.util.SelectedLocationRepository
 
 interface AppContainer {
     val application: WeatherApplication

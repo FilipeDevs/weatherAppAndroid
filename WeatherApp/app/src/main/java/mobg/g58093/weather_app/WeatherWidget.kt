@@ -10,12 +10,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import mobg.g58093.weather_app.data.WeatherRepository
-import com.squareup.picasso.Picasso;
 import mobg.g58093.weather_app.data.WeatherEntry
 import mobg.g58093.weather_app.network.RetroApi
 import mobg.g58093.weather_app.network.isOnline
 import mobg.g58093.weather_app.network.responses.WeatherResponse
 import mobg.g58093.weather_app.util.PropertiesManager
+import mobg.g58093.weather_app.util.getDynamicResourceId
 
 /**
  * Implementation of App Widget functionality.
@@ -67,9 +67,9 @@ internal fun updateAppWidget(
 ) {
 
     CoroutineScope(Dispatchers.IO).launch {
-        // Try to load currentLocation
+        // Try to load current location
         var weatherEntry : WeatherEntry? = WeatherRepository.getWeatherEntryCurrentLocation()
-        if(weatherEntry == null) {
+        if(weatherEntry == null) { // if no data found for current location load another location
             weatherEntry = WeatherRepository.getFirstNonCurrentLocationEntry()
         }
 
@@ -78,7 +78,7 @@ internal fun updateAppWidget(
         val views = RemoteViews(context.packageName, R.layout.weather_widget)
 
 
-        // Set up the onClickPendingIntent for the Button
+        // Set up the onClickPendingIntent for the Refresh Button
         val updateIntent = Intent(context, WeatherWidget::class.java)
         updateIntent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
         updateIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId))
@@ -95,14 +95,7 @@ internal fun updateAppWidget(
         response?.let {
             views.setTextViewText(R.id.location, it.name)
             views.setTextViewText(R.id.temp, "${it.main.temp.toInt()}°C")
-
-            // Load the image using Picasso
-            try {
-                val bitmap = Picasso.get().load("https://openweathermap.org/img/wn/${it.weather[0].icon}@2x.png").get()
-                views.setImageViewBitmap(R.id.weather, bitmap)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+            views.setImageViewResource(R.id.weather, getDynamicResourceId(it.weather[0].icon))
         }
         appWidgetManager.updateAppWidget(appWidgetId, views)
     }

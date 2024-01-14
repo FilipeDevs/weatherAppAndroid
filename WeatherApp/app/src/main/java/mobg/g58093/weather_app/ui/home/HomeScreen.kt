@@ -43,7 +43,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import mobg.g58093.weather_app.R
@@ -75,7 +74,7 @@ fun HomeScreen(
 
     val firstLaunchPerms by weatherViewModel.firstLaunchPerms.collectAsState()
 
-    var showRationalte by remember { mutableStateOf(false) } // rationale state
+    var showRationale by remember { mutableStateOf(false) } // rationale state
 
     // Permission launcher
     val requestPermissionLauncher =
@@ -83,13 +82,13 @@ fun HomeScreen(
             contract = ActivityResultContracts.RequestPermission(),
             onResult = { isGranted: Boolean ->
                 if (isGranted) {
-                    weatherViewModel.updatePermissions(true)
+                    weatherViewModel.updatePermissions()
                     // permissions granted so fetch current location
                     weatherViewModel.fetchWeatherCurrentLocation()
                     weatherViewModel.updateFirstLaunchPermissions()
                 } else {
-                    weatherViewModel.updatePermissions(false)
-                    showRationalte = true
+                    weatherViewModel.updatePermissions()
+                    showRationale = true
                 }
 
             })
@@ -118,7 +117,7 @@ fun HomeScreen(
         }
     }
 
-    if (showRationalte && !firstLaunchPerms) {
+    if (showRationale && !firstLaunchPerms) {
         ShowLocationPermissionPopup(context, weatherViewModel)
     }
 

@@ -5,20 +5,18 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import mobg.g58093.weather_app.util.SelectedLocationRepository
-import mobg.g58093.weather_app.util.SelectedLocationState
 import mobg.g58093.weather_app.data.ForecastEntry
-import mobg.g58093.weather_app.network.responses.ForecastWeather
 import mobg.g58093.weather_app.data.WeatherEntry
 import mobg.g58093.weather_app.data.WeatherRepository
 import mobg.g58093.weather_app.network.RetroApi
 import mobg.g58093.weather_app.network.isOnline
+import mobg.g58093.weather_app.network.responses.ForecastWeather
 import mobg.g58093.weather_app.util.PropertiesManager
+import mobg.g58093.weather_app.util.SelectedLocationRepository
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -44,8 +42,7 @@ class ForecastViewModel(
     private val TAG = "ForecastViewModel"
 
     /**
-     * Initializes the ForecastViewModel. Observes changes to the selected location state
-     * and initiates the forecast data retrieval process.
+     * Initiates the forecast data retrieval process.
      */
     init {
         viewModelScope.launch {
@@ -178,9 +175,7 @@ class ForecastViewModel(
         return WeatherRepository.getAllForecastsByLocation(weatherEntry.id)
     }
 
-    /**
-     * Observes changes to the selected location state and updates the weather data accordingly.
-     */
+
     private fun convertUnixTimestampToDayAndMonth(unixTimestamp: Long): String {
         val date = Date(unixTimestamp * 1000L)
         val sdf = SimpleDateFormat("dd/MM", Locale.getDefault())

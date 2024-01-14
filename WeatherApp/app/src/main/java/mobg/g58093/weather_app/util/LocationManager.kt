@@ -16,11 +16,16 @@ import com.google.android.gms.location.Priority
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 
+/**
+ * Singleton Repository for handling location permissions and GPS status.
+ */
 object LocationPermissionsAndGPSRepository {
 
+    // status of location permissions.
     private val _permissions = MutableStateFlow(false)
+
+    // status of GPS availability.
     private val _gps = MutableStateFlow(false)
 
     val permissions: StateFlow<Boolean> =
@@ -29,6 +34,9 @@ object LocationPermissionsAndGPSRepository {
     val gps : StateFlow<Boolean> =
         _gps.asStateFlow()
 
+    /**
+     * Refreshes the checks for location permissions and GPS status.
+     */
     fun refreshChecks(context: Context) {
         _permissions.value = hasLocationPermission(context)
         _gps.value = checkIsGPSEnabled(context)
@@ -36,7 +44,9 @@ object LocationPermissionsAndGPSRepository {
 }
 
 
-
+/**
+ * Checks if the app has the necessary location permissions.
+ */
 fun hasLocationPermission(context: Context): Boolean {
     return ContextCompat.checkSelfPermission(
         context,
@@ -44,6 +54,10 @@ fun hasLocationPermission(context: Context): Boolean {
     ) == PackageManager.PERMISSION_GRANTED
 }
 
+/**
+ * Retrieves the current location using the fused location provider.
+ *
+ */
 @SuppressLint("MissingPermission")
 fun getCurrentLocation(context: Context, callback: (Double, Double) -> Unit) {
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
@@ -61,7 +75,7 @@ fun getCurrentLocation(context: Context, callback: (Double, Double) -> Unit) {
                 val lat = location.latitude
                 val long = location.longitude
                 callback(lat, long)
-                fusedLocationClient.removeLocationUpdates(this)
+                fusedLocationClient.removeLocationUpdates(this) // unsubscribe from location updates
             }
 
         }
@@ -70,6 +84,9 @@ fun getCurrentLocation(context: Context, callback: (Double, Double) -> Unit) {
     fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
 }
 
+/**
+ * Checks if the GPS is enabled on the device.
+ */
 fun checkIsGPSEnabled(context: Context) : Boolean {
     val mLocationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
     return mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)

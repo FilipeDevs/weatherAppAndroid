@@ -11,6 +11,9 @@ import mobg.g58093.weather_app.ui.locations.LocationsViewModel
 import mobg.g58093.weather_app.ui.search.SearchViewModel
 
 
+/**
+ * Object responsible for providing ViewModel instances using a custom factory.
+ */
 object AppViewModelProvider {
     val Factory = viewModelFactory {
         initializer {
@@ -33,5 +36,8 @@ object AppViewModelProvider {
 }
 
 
+/**
+ * Extension function for CreationExtras that retrieves the WeatherApplication instance.
+ */
 fun CreationExtras.weatherApplication(): WeatherApplication =
     (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as WeatherApplication)
