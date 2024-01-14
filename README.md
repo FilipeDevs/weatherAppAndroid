@@ -1,34 +1,31 @@
 # Projet MOBG5
 
-Ce dépôt contient les sources du projet <Weather App>.
+Ce dépôt contient les sources du projet final : **Weather App**.
 
 ## Description
 
-Application de météo minimaliste qui propose une solution simple et efficace pour obtenir des informations météorologiques. L'application offre les fonctionnalités suivantes :
+Le projet est une application météo minimaliste permettant d'obtenir des informations météorologiques. L'application offre les fonctionnalités suivantes :
 
-* Consultation rapide de la météo : Accés facile aux prévisions météorologiques actuelles pour n'importe quelle ville ou lieu spécifique.
+* Consultation de la météo : Prévisions météorologiques actuelles pour n'importe quelle ville ou lieu spécifique.
 
-* Prévisions à court terme : Prévisions pour les prochains 7 jours.
+* Prévisions à court terme : Prévisions pour les 5 prochains jours.
 
-* Géolocalisation : Permet à l'application d'obtenir automatiquement les données météorologiques pour la position actuelle de l'utilisateur.
+* Géolocalisation : Permet à l'application d'obtenir automatiquement les données météorologiques pour la position actuelle de l'utilisateur, lui montrant ainsi les informations météo pour sa localisation.
 
-* Gestion de la liste de villes : L'utilisateur peut ajouter des villes à sa liste personnelle, lui permettant ainsi le suivi des conditions météorologiques de plusieurs endroits.
+* Gestion de la liste de villes : L'utilisateur peut ajouter des villes à sa liste personnelle, lui permettant ainsi de suivre les conditions météorologiques de plusieurs endroits.
 
 * Widget : Widget sur l'écran d'accueil de l'appareil, permettant de jeter un coup d'œil rapide sur les conditions météorologiques sans ouvrir l'application complète.
 
+* Cas d'exceptions : L'application gère également quelques cas d'exception, notamment l'absence d'internet, de signal GPS, ou des permissions de localisation. Malgré ces "problèmes", l'application reste fonctionnelle et informe l'utilisateur de ces situations.
+
 ## Persistance des données
 
-L'application utilise la base de données locale pour stocker et gérer les villes ajoutées par l'utilisateur.
+L'application utilise la base de données locale (ROOM) pour stocker et gérer les villes ajoutées par l'utilisateur. Les informations météo y sont également stockées pour permettre à l'application de fonctionner dans des cas d'exception.
 
-## Service rest
+## Service Rest
 
-L'application fait usage de l'API [OpenWeather](https://openweathermap.org/api) pour fournir des données météorologiques en temps réel.
+L'application fait usage de l'API [OpenWeather](https://openweathermap.org/api) pour fournir des données météorologiques.
 
-## Prototype
-
-Voici un prototype interactif de l'application sur Figma :
-
-https://www.figma.com/proto/jEsQmGRvmf9aJTxQ88VEgk/MOBG---Weather-App?type=design&node-id=1-2&t=JHzacbabqGWQj0Gu-1&scaling=scale-down&page-id=0%3A1&starting-point-node-id=8%3A162&mode=design
 
 ## Auteur
 
