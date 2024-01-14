@@ -15,15 +15,14 @@ object AppViewModelProvider {
     val Factory = viewModelFactory {
         initializer {
             val appContainer = this.weatherApplication().container
-            WeatherViewModel(appContainer.application, appContainer.userRepository)
+            WeatherViewModel(appContainer.application)
         }
         initializer {
             val appContainer = this.weatherApplication().container
-            ForecastViewModel(appContainer.application, appContainer.userRepository)
+            ForecastViewModel(appContainer.application)
         }
         initializer {
-            val appContainer = this.weatherApplication().container
-            LocationsViewModel(appContainer.userRepository)
+            LocationsViewModel()
         }
         initializer {
             val appContainer = this.weatherApplication().container

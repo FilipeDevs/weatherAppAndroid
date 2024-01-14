@@ -24,11 +24,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import mobg.g58093.weather_app.R
 import mobg.g58093.weather_app.util.AppViewModelProvider
 import mobg.g58093.weather_app.network.responses.LocationWeatherResponse
 import mobg.g58093.weather_app.util.getCountryFromCode
@@ -62,7 +64,7 @@ fun SearchScreen(
                     .fillMaxWidth()
                     .padding(start = 8.dp)
                     .background(color = Color.LightGray, shape = AbsoluteRoundedCornerShape(8.dp)),
-                placeholder = { Text(text = "Search...") },
+                placeholder = { Text(text = stringResource(R.string.searchPlaceholder)) },
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Search
                 ),
@@ -75,7 +77,7 @@ fun SearchScreen(
         }
         when(val currentState = searchState) {
             is SearchApiState.Loading -> {
-                Text("Searching...",
+                Text(text = stringResource(R.string.loading),
                     textAlign = TextAlign.Center,
                     style = TextStyle(color = Color.Gray))
             }
@@ -111,7 +113,7 @@ fun LocationsListResult(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    text = "No locations found...",
+                    text = stringResource(R.string.noLocations),
                     textAlign = TextAlign.Center,
                     style = TextStyle(color = Color.Gray)
                 )

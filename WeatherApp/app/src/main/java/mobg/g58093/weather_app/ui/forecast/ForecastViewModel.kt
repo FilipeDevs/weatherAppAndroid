@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -29,11 +30,8 @@ sealed class ForecastApiState {
 }
 
 class ForecastViewModel(
-    application: Application,
-    private val selectedLocationRepository: SelectedLocationRepository
+    application: Application
 ) : AndroidViewModel(application) {
-
-    private var selectedLocation = SelectedLocationState()
 
     private val context = application
 
@@ -45,14 +43,21 @@ class ForecastViewModel(
 
     private val TAG = "ForecastViewModel"
 
+    /**
+     * Initializes the ForecastViewModel. Observes changes to the selected location state
+     * and initiates the forecast data retrieval process.
+     */
     init {
         viewModelScope.launch {
-            observeSelectedCityState()
             getForecast()
         }
     }
 
-    // Narrow down the forecast to 5 timestamps (instead of 40) each for a corresponding day
+
+    /**
+     * Converts a list of forecast responses (40 timestamps) to a narrowed-down list containing 5 timestamps
+     * (one for each corresponding day).
+     */
     private fun convertResponseToFiveDays(forecastResponseList: List<ForecastWeather>)
             : MutableList<ForecastWeather> {
         val forecastList: MutableList<ForecastWeather> = mutableListOf()
@@ -63,6 +68,10 @@ class ForecastViewModel(
         return forecastList
     }
 
+    /**
+     * Initiates the process of fetching forecast data and
+     * updates the forecast state accordingly.
+     */
     private fun getForecast() {
         viewModelScope.launch {
             try {
@@ -70,8 +79,10 @@ class ForecastViewModel(
                 if (isOnline(context)) { // Does the app have internet connection ?
                     // Weather api call to OpenWeather (forecast data)
                     val response = RetroApi.weatherService.getWeatherForecast(
-                        selectedLocation.latitude,
-                        selectedLocation.longitude, units, apiKey
+                        SelectedLocationRepository.selectedLocationState.value.latitude,
+                        SelectedLocationRepository.selectedLocationState.value.longitude,
+                        units,
+                        apiKey
                     )
 
                     val forecastList = convertResponseToFiveDays(response.list)
@@ -79,7 +90,8 @@ class ForecastViewModel(
                     // Run db operations
                     withContext(Dispatchers.IO) {
                         val mainWeather: WeatherEntry = WeatherRepository.getWeatherEntry(
-                            selectedLocation.latitude, selectedLocation.longitude
+                            SelectedLocationRepository.selectedLocationState.value.latitude,
+                            SelectedLocationRepository.selectedLocationState.value.longitude
                         )!!
                         val forecastEntries =
                             WeatherRepository.getAllForecastsByLocation(mainWeather.id)
@@ -87,7 +99,7 @@ class ForecastViewModel(
                             _forecastState.value = ForecastApiState.Success(
                                 convertResponseToForecastEntryUpdate(forecastList, mainWeather)
                             )
-                        } else {
+                        } else { // insert fresh new data
                             _forecastState.value = ForecastApiState.Success(
                                 convertResponseToForecastEntryInsert(forecastList, mainWeather)
                             )
@@ -97,7 +109,8 @@ class ForecastViewModel(
                     // Load data from the local database
                     withContext(Dispatchers.IO) {
                         val mainWeather: WeatherEntry = WeatherRepository.getWeatherEntry(
-                            selectedLocation.latitude, selectedLocation.longitude
+                            SelectedLocationRepository.selectedLocationState.value.latitude,
+                            SelectedLocationRepository.selectedLocationState.value.longitude
                         )!!
                         val forecastEntries =
                             WeatherRepository.getAllForecastsByLocation(mainWeather.id)
@@ -116,6 +129,9 @@ class ForecastViewModel(
         }
     }
 
+    /**
+     * Converts forecast response data to forecast entries and updates the existing entries in the database.
+     */
     private suspend fun convertResponseToForecastEntryUpdate(
         forecastWeather: List<ForecastWeather>,
         weatherEntry: WeatherEntry
@@ -138,6 +154,9 @@ class ForecastViewModel(
 
     }
 
+    /**
+     * Converts forecast response data to forecast entries and inserts them into the database.
+     */
     private suspend fun convertResponseToForecastEntryInsert(
         forecastWeather: List<ForecastWeather>,
         weatherEntry: WeatherEntry
@@ -159,19 +178,13 @@ class ForecastViewModel(
         return WeatherRepository.getAllForecastsByLocation(weatherEntry.id)
     }
 
+    /**
+     * Observes changes to the selected location state and updates the weather data accordingly.
+     */
     private fun convertUnixTimestampToDayAndMonth(unixTimestamp: Long): String {
         val date = Date(unixTimestamp * 1000L)
         val sdf = SimpleDateFormat("dd/MM", Locale.getDefault())
         return sdf.format(date)
-    }
-
-    private fun observeSelectedCityState() {
-        viewModelScope.launch {
-            selectedLocationRepository.selectedLocationState.collect { newState ->
-                Log.d(TAG, "New selected location: $newState")
-                selectedLocation = newState
-            }
-        }
     }
 }
 

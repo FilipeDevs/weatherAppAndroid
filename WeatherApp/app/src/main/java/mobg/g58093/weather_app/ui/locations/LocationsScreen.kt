@@ -47,6 +47,7 @@ import mobg.g58093.weather_app.util.AppViewModelProvider
 import mobg.g58093.weather_app.R
 import mobg.g58093.weather_app.util.SelectedLocationState
 import mobg.g58093.weather_app.data.WeatherEntry
+import mobg.g58093.weather_app.util.SelectedLocationRepository
 
 
 @Composable
@@ -56,7 +57,7 @@ fun LocationsScreen(
     navigateToSearch: () -> Unit,
 ) {
     val locationsState by locationsViewModel.locationsState.collectAsState()
-    val selectedLocation by locationsViewModel.selectedLocation.collectAsState()
+    val selectedLocation by SelectedLocationRepository.selectedLocationState.collectAsState() // Selected location state
 
     LaunchedEffect(locationsViewModel.getAllUserLocations()) {}
 
@@ -87,7 +88,7 @@ fun LocationsScreen(
         ) {
             Icon(
                 Icons.Default.Add,
-                contentDescription = "Add",
+                contentDescription = "Add new location",
                 tint = MaterialTheme.colorScheme.secondary
             )
         }
@@ -108,7 +109,7 @@ fun LocationList(
                 modifier = modifier,
                 horizontalArrangement = Arrangement.spacedBy(5.dp)
             ) {
-                Column(modifier = Modifier.clickable{
+                Column(modifier = Modifier.clickable {
                     locationsViewModel.changeSelectedLocation(item.id)
                 }) {
                     Text(
@@ -121,7 +122,7 @@ fun LocationList(
                     )
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = item.mainTemp.toString() + "°C",
+                            text = "${item.mainTemp}°C",
                             style = TextStyle(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight(400),
@@ -140,8 +141,8 @@ fun LocationList(
                         Spacer(modifier = Modifier.weight(1f))
                         // Weather Icon
                         RadioButton(
-                            selected = selectedLocation.locationName == item.locationName
-                                    && selectedLocation.countryCode == item.country,
+                            selected = selectedLocation.longitude == item.longitude
+                                    && selectedLocation.latitude == item.latitude,
                             onClick = { locationsViewModel.changeSelectedLocation(item.id) },
                             colors = RadioButtonDefaults.colors(
                                 selectedColor = MaterialTheme.colorScheme.tertiary,

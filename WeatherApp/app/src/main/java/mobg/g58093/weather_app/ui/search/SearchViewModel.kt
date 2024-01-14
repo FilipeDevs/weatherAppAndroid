@@ -31,7 +31,7 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
 
     private val context = application
 
-    // Some states
+    // Main state
     private val _searchState = MutableStateFlow<SearchApiState>(SearchApiState.Success())
     val searchState: StateFlow<SearchApiState> = _searchState
 
@@ -40,6 +40,9 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
 
     private val TAG = "SearchViewModel"
 
+    /**
+     * Initiates a search for locations based on the provided [searchQuery].
+     */
     fun searchLocation(searchQuery : String) {
         viewModelScope.launch {
             _searchState.value = SearchApiState.Loading
@@ -59,6 +62,9 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    /**
+     * Adds the provided [location] to the favorites locations if it has not been added already.
+     */
     fun addLocationToFavorites(location: LocationWeatherResponse) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -76,6 +82,9 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    /**
+     * Converts a weather response to a [WeatherEntry] object.
+     */
     private fun convertWeatherResponseToWeatherEntry(weatherResponse: WeatherResponse) : WeatherEntry {
         return WeatherEntry(
             id = 0,
@@ -99,12 +108,18 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
         )
     }
 
+    /**
+     * Converts a Unix timestamp to a formatted string representing the hour and minutes.
+     */
     private fun convertCurrentDateToFormattedDate(): String {
         val date = Date()
         val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
         return sdf.format(date)
     }
 
+    /**
+     * Converts the current date to a formatted string.
+     */
     private fun convertUnixTimestampToHourAndMinutes(unixTimestamp: Long): String {
         val date = Date(unixTimestamp * 1000L)
         val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())

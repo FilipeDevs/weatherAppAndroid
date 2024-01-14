@@ -22,6 +22,7 @@ import mobg.g58093.weather_app.util.hasLocationPermission
 import mobg.g58093.weather_app.network.RetroApi
 import mobg.g58093.weather_app.network.responses.WeatherResponse
 import mobg.g58093.weather_app.network.isOnline
+import mobg.g58093.weather_app.util.LocationPermissionsAndGPSRepository
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -35,7 +36,7 @@ sealed class WeatherApiState {
 }
 
 class WeatherViewModel(
-    application: Application, private val selectedLocationRepository: SelectedLocationRepository
+    application: Application
 ) : AndroidViewModel(application) {
 
     private val context = application
@@ -47,47 +48,51 @@ class WeatherViewModel(
     private val _weatherState = MutableStateFlow<WeatherApiState>(WeatherApiState.Loading)
     val weatherState: StateFlow<WeatherApiState> = _weatherState
 
-    // Current selected location
-    private val _selectedLocation = MutableStateFlow(SelectedLocationState())
-    val selectedLocation: StateFlow<SelectedLocationState> = _selectedLocation
-
-    // Permissions
-    private val _locationPermission = MutableStateFlow(true)
-    val locationPermission: StateFlow<Boolean> = _locationPermission
-
-    // GPS
-    private val _gpsStatus = MutableStateFlow(true)
-    val gpsStatus: StateFlow<Boolean> = _gpsStatus
-
     // Flag of permissions request (only happens on launch)
     private val _firstLaunchPerms = MutableStateFlow(false)
     val firstLaunchPerms: StateFlow<Boolean> = _firstLaunchPerms
 
 
+    /**
+     * Initializes the WeatherViewModel. Initiates the weather data retrieval based on the selected location.
+     */
     init {
         viewModelScope.launch {
-            if (selectedLocation.value.currentLocation) { // current location selected
+            // current location selected
+            if (SelectedLocationRepository.selectedLocationState.value.currentLocation) {
                 fetchWeatherCurrentLocation()
             } else {
                 getWeatherByCoordinates(
-                    selectedLocation.value.latitude, selectedLocation.value.longitude, false
+                    SelectedLocationRepository.selectedLocationState.value.latitude,
+                    SelectedLocationRepository.selectedLocationState.value.longitude,
+                    false
                 )
             }
+
+        }
+        viewModelScope.launch {
+            observePermissionsState()
+        }
+        viewModelScope.launch {
             observeSelectedCityState() // Listen to changes to selected location
         }
     }
 
+    /**
+     * Updates the flag indicating that the permissions have been requested for the first time.
+     */
     fun updateFirstLaunchPermissions() {
         _firstLaunchPerms.update { true }
     }
 
+    /**
+     * Fetches weather data for the current location.
+     */
     fun fetchWeatherCurrentLocation() {
-        // Check location permissions and GPS status
-        _locationPermission.value = hasLocationPermission(context)
-        _gpsStatus.value = checkIsGPSEnabled(context)
+        LocationPermissionsAndGPSRepository.refreshChecks(context)
 
-        if (locationPermission.value) {
-            if (gpsStatus.value) {
+        if (LocationPermissionsAndGPSRepository.permissions.value) {
+            if (LocationPermissionsAndGPSRepository.gps.value) {
                 getCurrentLocation(context) { lat, long -> // fetch new current location
                     getWeatherByCoordinates(
                         lat, long, true
@@ -103,8 +108,11 @@ class WeatherViewModel(
         }
     }
 
+    /**
+     * Updates the location permission status.
+     */
     fun updatePermissions(perms: Boolean) {
-        _locationPermission.update { perms }
+        LocationPermissionsAndGPSRepository.refreshChecks(context)
     }
 
     private fun fetchOldCurrentLocation() {
@@ -124,6 +132,7 @@ class WeatherViewModel(
                             currentLocationEntry.latitude, currentLocationEntry.longitude, false
                         )
                     } else { // No locations on DB, user has to manually add one
+                        Log.d(TAG, "Here ")
                         _weatherState.value = WeatherApiState.Error(
                             "No locations found. Please add manually a location to view the weather."
                         )
@@ -133,13 +142,17 @@ class WeatherViewModel(
         }
     }
 
+    /**
+     * Observes changes to the selected location state and updates the weather data accordingly.
+     */
     private suspend fun observeSelectedCityState() {
-        selectedLocationRepository.selectedLocationState.collect { newState ->
-            if (!selectedLocationRepository.isLocationStateEmpty()) {
-                _selectedLocation.update { newState }
+        SelectedLocationRepository.selectedLocationState.collect { newLocationState ->
+            Log.d("WeatherViewModel", "Listened to changes !")
+            if (!SelectedLocationRepository.isLocationStateEmpty()) {
                 getWeatherByCoordinates(
-                    selectedLocation.value.latitude,
-                    selectedLocation.value.longitude, selectedLocation.value.currentLocation
+                    newLocationState.latitude,
+                    newLocationState.longitude,
+                    newLocationState.currentLocation,
                 )
             } else {
                 _weatherState.value = WeatherApiState.Error(
@@ -148,7 +161,15 @@ class WeatherViewModel(
             }
 
         }
+    }
 
+    private suspend fun observePermissionsState() {
+        LocationPermissionsAndGPSRepository.permissions.collect { newPermissionsState ->
+            Log.d(TAG, "Permissions changed : $newPermissionsState")
+            if(newPermissionsState && SelectedLocationRepository.selectedLocationState.value.currentLocation) {
+                fetchWeatherCurrentLocation()
+            }
+        }
     }
 
     private fun getWeatherByCoordinates(
@@ -158,6 +179,7 @@ class WeatherViewModel(
             try {
                 _weatherState.value = WeatherApiState.Loading // Loading state
                 if (isOnline(context)) {
+
                     // Weather API call to OpenWeather
                     val response = RetroApi.weatherService.getWeatherByCoordinates(
                         latitude, longitude, units, apiKey
@@ -194,6 +216,10 @@ class WeatherViewModel(
 
     }
 
+    /**
+     * Gets the existing weather entry ID for the given coordinates and current location status.
+     * @return The existing weather entry ID, or 0 if not found.
+     */
     private suspend fun getExistingWeatherEntryId(
         latitude: Double, longitude: Double, isCurrentLocation: Boolean
     ): Int {
@@ -203,13 +229,17 @@ class WeatherViewModel(
             ?: 0 else 0
     }
 
+    /**
+     * Loads old weather data from the database for the specified location.
+     */
     private suspend fun loadOldDataFromDB(isCurrentLocation: Boolean) {
         withContext(Dispatchers.IO) {
             val localWeatherEntry: WeatherEntry? = if (isCurrentLocation) {
                 WeatherRepository.getWeatherEntryCurrentLocation()
             } else {
                 WeatherRepository.getWeatherEntry(
-                    selectedLocation.value.latitude, selectedLocation.value.longitude
+                    SelectedLocationRepository.selectedLocationState.value.latitude,
+                    SelectedLocationRepository.selectedLocationState.value.longitude,
                 )
             }
 
@@ -224,8 +254,11 @@ class WeatherViewModel(
         }
     }
 
+    /**
+     * Updates the selected location in the repository based on the provided weather entry and location status.
+     */
     private fun updateSelectedLocation(weatherEntry: WeatherEntry, isCurrentLocation: Boolean) {
-        selectedLocationRepository.editSelectLocation(
+        SelectedLocationRepository.editSelectLocation(
             SelectedLocationState(
                 weatherEntry.locationName,
                 weatherEntry.country,
@@ -242,6 +275,9 @@ class WeatherViewModel(
         return sdf.format(date)
     }
 
+    /**
+     * Converts a Unix timestamp to a formatted string representing the hour and minutes.
+     */
     private fun convertUnixTimestampToHourAndMinutes(
         unixTimestamp: Long,
         timeZoneOffsetSeconds: Int
@@ -249,9 +285,7 @@ class WeatherViewModel(
         val date = Date(unixTimestamp * 1000L)
         val adjustedTime = date.time + timeZoneOffsetSeconds * 1000L
         val adjustedDate = Date(adjustedTime)
-        val sdf = SimpleDateFormat("HH:mm")
-
-        sdf.timeZone = TimeZone.getTimeZone("GMT")
+        val sdf = SimpleDateFormat("HH:mm", Locale.US)
 
         return sdf.format(adjustedDate)
     }
@@ -287,15 +321,18 @@ class WeatherViewModel(
         )
     }
 
+    /**
+     * Refreshes weather data based on the current selected location.
+     */
     fun refreshData() {
         viewModelScope.launch {
-            if (selectedLocation.value.currentLocation) {
+            if (SelectedLocationRepository.selectedLocationState.value.currentLocation) {
                 fetchWeatherCurrentLocation()
             } else {
                 getWeatherByCoordinates(
-                    selectedLocation.value.latitude,
-                    selectedLocation.value.longitude,
-                    selectedLocation.value.currentLocation
+                    SelectedLocationRepository.selectedLocationState.value.latitude,
+                    SelectedLocationRepository.selectedLocationState.value.longitude,
+                    SelectedLocationRepository.selectedLocationState.value.currentLocation
                 )
             }
 

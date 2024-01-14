@@ -68,7 +68,7 @@ fun DetailsScreen(
                     )
                 )
                 Text(
-                    text = "${currentState.data.wind}km/h",
+                    text = "${currentState.data.wind} km/h",
                     style = TextStyle(
                         fontSize = 20.sp,
                         fontWeight = FontWeight(400),
@@ -122,7 +122,7 @@ fun DetailsScreen(
                     )
                 )
                 Text(
-                    text = "${currentState.data.pressure}hPa",
+                    text = "${currentState.data.pressure} hPa",
                     style = TextStyle(
                         fontSize = 20.sp,
                         fontWeight = FontWeight(400),

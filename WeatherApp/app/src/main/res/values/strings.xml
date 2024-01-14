@@ -19,4 +19,6 @@
     <string name="rationaleLocation">The app requires access to your location for a better experience.</string>
     <string name="settings">Go to Settings</string>
     <string name="dismiss">Dismiss</string>
+    <string name="searchPlaceholder">Search…</string>
+    <string name="noLocations">No locations found…</string>
 </resources>

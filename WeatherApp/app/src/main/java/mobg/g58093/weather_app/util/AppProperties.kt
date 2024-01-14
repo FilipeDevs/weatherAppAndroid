@@ -4,6 +4,9 @@ import android.content.Context
 import mobg.g58093.weather_app.R
 import java.util.Properties
 
+/**
+ * Singleton object responsible for managing application properties.
+ */
 object PropertiesManager {
 
     fun getApiKey(context: Context): String {

@@ -47,6 +47,8 @@ import coil.compose.AsyncImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import mobg.g58093.weather_app.R
+import mobg.g58093.weather_app.util.LocationPermissionsAndGPSRepository
+import mobg.g58093.weather_app.util.SelectedLocationRepository
 import mobg.g58093.weather_app.util.SelectedLocationState
 import mobg.g58093.weather_app.util.checkIsGPSEnabled
 import mobg.g58093.weather_app.util.getCountryFromCode
@@ -66,12 +68,12 @@ fun HomeScreen(
     val context = LocalContext.current
 
     val weatherState by weatherViewModel.weatherState.collectAsState() // Main weather state
-    val selectedLocation by weatherViewModel.selectedLocation.collectAsState() // Selected location state
+    val selectedLocation by SelectedLocationRepository.selectedLocationState.collectAsState() // Selected location state
 
-    val permissionState by weatherViewModel.locationPermission.collectAsState() // Permissions state
-    val gpsState by weatherViewModel.gpsStatus.collectAsState() // Gps
+    val permissionState by LocationPermissionsAndGPSRepository.permissions.collectAsState() // Permissions state
+    val gpsState by LocationPermissionsAndGPSRepository.gps.collectAsState() // Gps
 
-    val firstLaunch by weatherViewModel.firstLaunchPerms.collectAsState() // Has the VM initialized
+    val firstLaunchPerms by weatherViewModel.firstLaunchPerms.collectAsState()
 
     var showRationalte by remember { mutableStateOf(false) } // rationale state
 
@@ -110,13 +112,13 @@ fun HomeScreen(
                 SnackbarResult.Dismissed -> {}
             }
         }
-        // Request permissions (only on first launch)
-        if (!permissionState && selectedLocation.currentLocation && !firstLaunch) {
+        // Request permissions (only once after launch)
+        if (!permissionState && selectedLocation.currentLocation && !firstLaunchPerms) {
             requestPermissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
 
-    if (showRationalte && !firstLaunch) {
+    if (showRationalte && !firstLaunchPerms) {
         ShowLocationPermissionPopup(context, weatherViewModel)
     }
 

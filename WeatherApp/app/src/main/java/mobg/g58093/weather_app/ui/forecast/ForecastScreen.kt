@@ -94,7 +94,6 @@ private fun ForecastList(forecastList: List<ForecastEntry>, modifier: Modifier) 
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 // Weather Icon
-                // Weather Icon
                 Image(
                     modifier = Modifier
                         .width(50.dp)

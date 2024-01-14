@@ -6,7 +6,6 @@ import mobg.g58093.weather_app.util.SelectedLocationRepository
 
 interface AppContainer {
     val application: WeatherApplication
-    val userRepository: SelectedLocationRepository
 }
 
 class AppDataContainer(private val context: Context) : AppContainer {
@@ -15,9 +14,6 @@ class AppDataContainer(private val context: Context) : AppContainer {
         context.applicationContext as WeatherApplication
     }
 
-    override val userRepository: SelectedLocationRepository by lazy {
-        SelectedLocationRepository()
-    }
 }
 
 class WeatherApplication : Application() {
