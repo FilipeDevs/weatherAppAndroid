@@ -105,17 +105,19 @@ class ForecastViewModel(
                 } else { // No internet connection
                     // Load data from the local database
                     withContext(Dispatchers.IO) {
-                        val mainWeather: WeatherEntry = WeatherRepository.getWeatherEntry(
+                        val mainWeather: WeatherEntry? = WeatherRepository.getWeatherEntry(
                             SelectedLocationRepository.selectedLocationState.value.latitude,
                             SelectedLocationRepository.selectedLocationState.value.longitude
-                        )!!
+                        )
                         val forecastEntries =
-                            WeatherRepository.getAllForecastsByLocation(mainWeather.id)
-                        if (forecastEntries.isNotEmpty()) {
-                            _forecastState.value = ForecastApiState.Success(forecastEntries)
-                        } else {
-                            _forecastState.value =
-                                ForecastApiState.Error("No internet connection and no forecast data in the database.")
+                            mainWeather?.let { WeatherRepository.getAllForecastsByLocation(it.id) }
+                        if (forecastEntries != null) {
+                            if (forecastEntries.isNotEmpty()) {
+                                _forecastState.value = ForecastApiState.Success(forecastEntries)
+                            } else {
+                                _forecastState.value =
+                                    ForecastApiState.Error("No internet connection and no forecast data in the database.")
+                            }
                         }
                     }
                 }

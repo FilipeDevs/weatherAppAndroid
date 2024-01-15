@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,6 +39,7 @@ import mobg.g58093.weather_app.data.WeatherEntry
 import mobg.g58093.weather_app.util.AppViewModelProvider
 import mobg.g58093.weather_app.util.SelectedLocationRepository
 import mobg.g58093.weather_app.util.SelectedLocationState
+import mobg.g58093.weather_app.util.getCountryFromCode
 
 
 @Composable
@@ -102,14 +104,24 @@ fun LocationList(
                 Column(modifier = Modifier.clickable {
                     locationsViewModel.changeSelectedLocation(item.id)
                 }) {
-                    Text(
-                        text = item.locationName,
-                        style = TextStyle(
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight(400),
-                            color = MaterialTheme.colorScheme.secondary,
+                    Row {
+                        Text(
+                            text = "${item.locationName} - ${getCountryFromCode(item.country)}",
+                            style = TextStyle(
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight(400),
+                                color = MaterialTheme.colorScheme.secondary,
+                            )
                         )
-                    )
+                        if(item.currentLocation) {
+                            Spacer(modifier = Modifier.width(5.dp))
+                            Icon(
+                                Icons.Default.LocationOn,
+                                contentDescription = "Current Location",
+                                tint = Color.Gray
+                            )
+                        }
+                    }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = "${item.mainTemp}°C",

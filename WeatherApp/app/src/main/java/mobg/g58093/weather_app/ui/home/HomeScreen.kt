@@ -17,8 +17,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -135,15 +138,25 @@ fun HomeScreen(
 
             is WeatherApiState.Success -> {
                 // Location Name
-                Text(
-                    text = "${currentState.data.locationName} \n ${getCountryFromCode(currentState.data.country)}",
-                    style = TextStyle(
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight(400),
-                        color = MaterialTheme.colorScheme.tertiary,
-                        textAlign = TextAlign.Center
+                Row {
+                    Text(
+                        text = currentState.data.locationName,
+                        style = TextStyle(
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight(400),
+                            color = MaterialTheme.colorScheme.tertiary,
+                            textAlign = TextAlign.Center
+                        )
                     )
-                )
+                    if(currentState.data.currentLocation) {
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Icon(
+                            Icons.Default.LocationOn,
+                            contentDescription = "Current Location",
+                            tint = Color.Gray
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(5.dp))
                 // Date
@@ -342,7 +355,7 @@ fun showGpsSnackbar(
     scope: CoroutineScope
 ) {
     scope.launch {
-        if (!checkIsGPSEnabled(context) && selectedLocation.currentLocation) {
+        if (!LocationPermissionsAndGPSRepository.gps.value && selectedLocation.currentLocation) {
             val result = snackbarHostState.showSnackbar(
                 message = "Please enable GPS",
                 actionLabel = "Enable GPS",
