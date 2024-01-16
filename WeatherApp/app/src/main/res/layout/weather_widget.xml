@@ -3,8 +3,7 @@
     style="@style/Widget.Weather_app.AppWidget.Container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:theme="@style/Theme.Weather_app.AppWidgetContainer"
-   >
+    android:theme="@style/Theme.Weather_app.AppWidgetContainer">
 
     <LinearLayout
         android:layout_width="117dp"
@@ -53,6 +52,7 @@
                 android:layout_width="97dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:contentDescription="@string/refresh"
                 android:scaleType="center"
                 android:src="@drawable/rotate" />
 

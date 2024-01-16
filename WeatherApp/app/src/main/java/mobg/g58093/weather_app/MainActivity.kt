@@ -32,8 +32,12 @@ class MainActivity : ComponentActivity(){
 
     override fun onResume() {
         super.onResume()
+        // Perform necessary checks for permissions and GPS when the user resumes the app.
+        // This is crucial as the user may have exited the app to adjust permissions or GPS settings,
+        // and the application needs to ensure it is up-to-date when the user returns.
         LocationPermissionsAndGPSRepository.refreshChecks(applicationContext)
     }
+
 }
 
 @Preview(showBackground = true)

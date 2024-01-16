@@ -64,6 +64,7 @@ fun TopAppBar(
             }
         },
         actions = {
+            // When in locations screen, the user should not "re-navigate" to the locations screen again
             if(currentScreenTitle != WeatherAppScreen.Locations.title) {
                 IconButton(onClick = { navigateToLocations() }) {
                     Icon(imageVector = Icons.Default.List, contentDescription = null)
@@ -83,9 +84,13 @@ fun WeatherApp() {
     val currentScreen = WeatherAppScreen.valueOf(
         backStackEntry?.destination?.route ?: WeatherAppScreen.Home.name
     )
+    // Shared View Model for Details and Home screens
     val weatherViewModel : WeatherViewModel = viewModel(factory = AppViewModelProvider.Factory)
+
+    // Basic setup to show a snackbar
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+
     Scaffold(
         topBar = {
             TopAppBar(

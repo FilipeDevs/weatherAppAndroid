@@ -1,9 +1,9 @@
 package mobg.g58093.weather_app.ui.home
 
 import android.content.Context
-import android.provider.Settings
 import android.content.Intent
 import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -52,8 +52,6 @@ import mobg.g58093.weather_app.R
 import mobg.g58093.weather_app.util.LocationPermissionsAndGPSRepository
 import mobg.g58093.weather_app.util.SelectedLocationRepository
 import mobg.g58093.weather_app.util.SelectedLocationState
-import mobg.g58093.weather_app.util.checkIsGPSEnabled
-import mobg.g58093.weather_app.util.getCountryFromCode
 import mobg.g58093.weather_app.util.getDynamicResourceId
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -90,6 +88,7 @@ fun HomeScreen(
                     weatherViewModel.fetchWeatherCurrentLocation()
                     weatherViewModel.updateFirstLaunchPermissions()
                 } else {
+                    // Permissions not granted so show another pop up (rationale)
                     weatherViewModel.updatePermissions()
                     showRationale = true
                 }
@@ -374,6 +373,10 @@ fun showGpsSnackbar(
     }
 }
 
+/**
+ * This rationale (popup) serves the purpose to make understand to the user why the app needs access
+ * to his location.
+ */
 @Composable
 fun ShowLocationPermissionPopup(context: Context, weatherViewModel: WeatherViewModel) {
     // State to track whether the dialog is shown

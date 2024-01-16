@@ -67,6 +67,7 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.6")
     implementation("io.coil-kt:coil-compose:2.4.0")
 
+    // Location provider (fused location)
     implementation ("com.google.android.gms:play-services-location:21.0.1")
 
     // Retrofit

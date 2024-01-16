@@ -1,7 +1,6 @@
 package mobg.g58093.weather_app.ui.search
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -38,7 +37,6 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
     private val apiKey = PropertiesManager.getApiKey(application)
     private val units = PropertiesManager.getUnits(application)
 
-    private val TAG = "SearchViewModel"
 
     /**
      * Initiates a search for locations based on the provided [searchQuery].
@@ -51,11 +49,9 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
                     val response = RetroApi.weatherService.getCityWeather(searchQuery, 5,apiKey)
                     _searchState.value = SearchApiState.Success(response)
                 } catch (e: Exception) {
-                    Log.e(TAG, "Encountered an error : ${e.message}")
                     _searchState.value = SearchApiState.Error("An unexpected error occurred")
                 }
             } else {
-                Log.e(TAG, "No internet connection...")
                 _searchState.value = SearchApiState.Error("Unable to search locations due to lack " +
                         "of internet connection")
             }
@@ -73,7 +69,6 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
                     // Weather api call to OpenWeather
                     val response = RetroApi.weatherService.getWeatherByCoordinates(location.lat, location.lon, units, apiKey)
                     // Run db operations
-
                     val newWeatherEntry = convertWeatherResponseToWeatherEntry(response)
                     WeatherRepository.insertWeatherEntry(newWeatherEntry)
 
