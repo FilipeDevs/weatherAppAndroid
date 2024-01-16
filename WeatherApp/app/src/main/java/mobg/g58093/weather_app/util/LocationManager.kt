@@ -8,7 +8,6 @@ import com.google.android.gms.location.LocationServices
 import android.Manifest
 import android.location.LocationManager
 import android.os.Looper
-import android.util.Log
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -70,7 +69,6 @@ fun getCurrentLocation(context: Context, callback: (Double, Double) -> Unit) {
     val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             val location = locationResult.lastLocation
-            Log.d("getCurrentLocation", "$location")
             if(location != null) {
                 val lat = location.latitude
                 val long = location.longitude

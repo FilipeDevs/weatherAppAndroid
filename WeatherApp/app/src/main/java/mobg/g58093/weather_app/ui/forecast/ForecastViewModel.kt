@@ -39,8 +39,6 @@ class ForecastViewModel(
     private val apiKey = PropertiesManager.getApiKey(application)
     private val units = PropertiesManager.getUnits(application)
 
-    private val TAG = "ForecastViewModel"
-
     /**
      * Initiates the forecast data retrieval process.
      */
@@ -122,7 +120,6 @@ class ForecastViewModel(
                     }
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Error fetching data: ${e.message}")
                 _forecastState.value = ForecastApiState.Error("Error fetching data: ${e.message}")
             }
         }

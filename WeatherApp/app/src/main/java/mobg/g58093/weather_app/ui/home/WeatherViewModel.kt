@@ -1,7 +1,6 @@
 package mobg.g58093.weather_app.ui.home
 
 import android.app.Application
-import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -39,7 +38,6 @@ class WeatherViewModel(
     private val context = application
     private val apiKey = PropertiesManager.getApiKey(application)
     private val units = PropertiesManager.getUnits(application)
-    private val TAG = "HomeViewModel"
 
     // Main data
     private val _weatherState = MutableStateFlow<WeatherApiState>(WeatherApiState.Loading)
@@ -100,7 +98,6 @@ class WeatherViewModel(
             }
 
         } else { // Permission not granted, try to fetch old current location
-            Log.d(TAG, "Location permissions not granted")
             fetchOldCurrentLocation()
         }
     }
@@ -132,7 +129,6 @@ class WeatherViewModel(
                             currentLocationEntry.latitude, currentLocationEntry.longitude, false
                         )
                     } else { // No locations on DB, user has to manually add one
-                        Log.d(TAG, "Here ")
                         _weatherState.value = WeatherApiState.Error(
                             "No locations found. Please add manually a location to view the weather."
                         )
@@ -167,7 +163,6 @@ class WeatherViewModel(
      */
     private suspend fun observePermissionsState() {
         LocationPermissionsAndGPSRepository.permissions.collect { newPermissionsState ->
-            Log.d(TAG, "Permissions changed : $newPermissionsState")
             if(newPermissionsState && SelectedLocationRepository.selectedLocationState.value.currentLocation) {
                 fetchWeatherCurrentLocation()
             }
