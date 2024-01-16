@@ -1,32 +1,25 @@
-# Projet MOBG5
+# Android Weather App
 
-Ce dépôt contient les sources du projet final : **Weather App**.
+A simple and straightforward weather application developed for Android.
 
-## Description
+## Tech Stack
 
-Le projet est une application météo minimaliste permettant d'obtenir des informations météorologiques. L'application offre les fonctionnalités suivantes :
+**Android Studio (Jetpack Compose / Kotlin)**
 
-* Consultation de la météo : Prévisions météorologiques actuelles pour n'importe quelle ville ou lieu spécifique.
+## Features
 
-* Prévisions à court terme : Prévisions pour les 5 prochains jours.
+- Current Weather: Provides current weather for any specific city or location.
 
-* Géolocalisation : Permet à l'application d'obtenir automatiquement les données météorologiques pour la position actuelle de l'utilisateur, lui montrant ainsi les informations météo pour sa localisation.
+- Short-term forecast: Forecast for the next 5 days.
 
-* Gestion de la liste de villes : L'utilisateur peut ajouter des villes à sa liste personnelle, lui permettant ainsi de suivre les conditions météorologiques de plusieurs endroits.
+- Geolocation: Allows the app to automatically obtain weather data for the user's current location, thereby showing them weather information for their location.
 
-* Widget : Widget sur l'écran d'accueil de l'appareil, permettant de jeter un coup d'œil rapide sur les conditions météorologiques sans ouvrir l'application complète.
+- City List Management: User can add cities to their personal list, allowing them to track the weather conditions of multiple locations.
 
-* Cas d'exceptions : L'application gère également quelques cas d'exception, notamment l'absence d'internet, de signal GPS, ou des permissions de localisation. Malgré ces "problèmes", l'application reste fonctionnelle et informe l'utilisateur de ces situations.
+- Integrated Widget: Widget on the device home screen, allowing a quick glance at weather conditions without opening the full app.
 
-## Persistance des données
+- Exception cases: The application also manages some exceptional cases, notably the absence of internet, GPS signal, or location permissions. Despite these "problems", the application remains functional and informs the user of these situations.
 
-L'application utilise la base de données locale (ROOM) pour stocker et gérer les villes ajoutées par l'utilisateur. Les informations météo y sont également stockées pour permettre à l'application de fonctionner dans des cas d'exception.
+## Screenshots
 
-## Service Rest
-
-L'application fait usage de l'API [OpenWeather](https://openweathermap.org/api) pour fournir des données météorologiques.
-
-
-## Auteur
-
-**Filipe Pereira Martins** - G58093 - E11 - 2023/24
+TODO

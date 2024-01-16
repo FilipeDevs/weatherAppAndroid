@@ -1,7 +1,0 @@
-<resources>
-    <string name="app_name">Remise_1</string>
-    <string name="login">Login</string>
-    <string name="home">Home</string>
-    <string name="ok">OK</string>
-    <string name="error">Error, the email is not valid</string>
-</resources>
